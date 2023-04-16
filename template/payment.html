@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyft Cab Services</title>
+    <link rel="stylesheet" href="../static/home.css">
+    <link rel="stylesheet" href="../static/booking.css">
+
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="about-us/">About Us</a></li>
+                <li><a href="/contact-us/">Contact Us</a></li>
+                <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            {% if output %}
+            <h1>Hello {{ output }}, Payments</h1>
+            {% else %}
+            <h1>Book a Ride with Lyft</h1>
+            {% endif %}
+            <p>Safe and reliable rides at affordable prices</p>
+            <a href="booking" class="button">Book a Ride</a>
+
+        </section>
+        <div class="book-a-ride" id="book-a-ride">
+            <h2>Order Summary</h2>
+            <p><strong>Pickup Location:</strong> 123 Main Street</p>
+            <p><strong>Drop-off Location:</strong> 456 Oak Avenue</p>
+            <p><strong>Cab Type:</strong> Standard</p>
+            <p><strong>Ride Duration:</strong> 30 minutes</p>
+            <p><strong>Total Cost:</strong> $20</p>
+        </div> 
+    </main>
+    <footer>
+        <p>&copy; 2023 Cab Services. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

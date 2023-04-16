@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>MySQL Queries</title>
+</head>
+
+<body>
+
+    <h1>Results of Query 1:</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>email</th>
+                <th>owner name</th>
+                <th>owner type</th>
+                <th>owner id</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result1 %}
+            <tr>
+                {% for value in row %}
+                <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h1>Results of Query 1:</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>driver first name</th>
+                <th>rating</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in result2 %}
+            <tr>
+                {% for value in row %}
+                <td>{{ value }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+</body>
+
+</html>

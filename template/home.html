@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyft Cab Services</title>
+    <link rel="stylesheet" href="../static/home.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <script>console.log(output)</script>
+                {% if output %}
+                
+                <li><a href="about-us/">About Us</a></li>
+                <li><a href="/contact-us/">Contact Us</a></li>
+                <li><a href="http://127.0.0.1:8000/profile/">Profile</a></li>
+                <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+                {% else %}
+                <li><a href="about-us/">About Us</a></li>
+                <li><a href="/contact-us/">Contact Us</a></li>
+                <li><a href="login/">Login</a></li>
+                <li><a href="signup/">Sign Up</a></li>
+                {% endif %}
+                
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            {% if output %}
+            <h1>Hello {{ output.firstname}}, Book a Ride with Lyft</h1>
+            {% else %}
+            <h1>Book a Ride with Lyft</h1>
+            {% endif %}
+            <p>Safe and reliable rides at affordable prices</p>
+            <a href="http://127.0.0.1:8000/booking/" class="button">Book a Ride</a>
+
+        </section>
+        <section class="services">
+            <h2>Our Services</h2>
+            <div class="service-card">
+                <img src="https://via.placeholder.com/150x150" alt="Corporate Rides">
+                <h3>Lyft a Moto</h3>
+                <p>Get a fast ride across narrow streets of city at cheapest rates. </p>
+            </div>
+            <div class="service-card">
+                <img src="https://via.placeholder.com/150x150" alt="Corporate Rides">
+                <h3>Lyft a Sedan</h3>
+                <p>Get a Luxurious ride in our most comfortable sedans and feel like you are the boss. </p>
+            </div>
+            <div class="service-card">
+                <img src="https://via.placeholder.com/150x150" alt="Corporate Rides">
+                <h3>Lyft a SUV</h3>
+                <p>Do you have a large luggage? Dont worry, book Lyft SUVs and enjoy the ride peacfully.</p>
+            </div>
+            <div class="service-card">
+                <img src="https://via.placeholder.com/150x150" alt="Corporate Rides">
+                <h3>Lyft a Hatchback</h3>
+                <p>Just book lyft Hatchback and enjoy compact rides, hassle-free at reliable rates.</p>
+            </div>
+            
+        </section>
+        
+    </main>
+    <footer>
+        <p>&copy; 2023 Cab Services. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

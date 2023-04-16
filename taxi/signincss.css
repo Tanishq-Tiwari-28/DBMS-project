@@ -1,0 +1,123 @@
+body{
+    box-sizing: border-box;
+    background-color: black;
+    text-orientation: sideways-right;
+}
+div#main-content{
+    display: flex;
+}
+
+div#login{
+    flex-direction: row;
+    justify-content:flex-end;
+    /* margin-left: 250px;  */
+
+}
+
+#login h1{
+    margin-left: 230px;
+    margin-top: 130px;   
+}
+  
+
+h1{
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    color: white;
+}
+
+img{
+    max-width: 100%;
+    margin-top: 40px;
+    margin-left: 50px;
+}
+
+ul{
+    list-style: none;
+    padding: 0;
+    margin:0;
+}
+
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+}
+
+nav ul li{
+    display: inline;
+    margin-right: 40px;
+    
+    border: none;
+    
+}   
+nav button{
+    background-color: black;
+    color: white;
+    border: none;
+    font-size: 20px;
+}
+
+#ss{
+    background-color: white;
+    border-radius: 10px;
+    color: black;
+    height: 27px;
+    width: 80px;
+    font-size: 20px;
+}
+
+button:hover{
+    cursor: pointer;
+}
+
+input{
+    display: block;
+    margin-left: 100px;
+    width: 450px;
+    height: 45px;
+    border-radius: 50px;
+    margin-bottom: 35px;
+    
+}
+
+#userid label{
+    
+    margin-top: 20px;
+}
+
+#password label{
+    margin-top: 30px;
+}
+#login button{
+    margin-top: 40px;
+    margin-left: 100px;
+    width: 450px;
+    height: 45px;
+    border-radius: 15px;
+    font-size: 15px;
+    background-color: black;
+    color: white;
+    border-color: #FF9900;
+}
+
+label{
+    margin-left: 100px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 19px;
+    /* margin-top: px; */
+    color: white;
+}
+
+
+h3{
+    margin-left: 220px;
+    color:#ACA1A1 ;
+}
+
+a{
+    color: white;
+    text-decoration: none;
+}
+

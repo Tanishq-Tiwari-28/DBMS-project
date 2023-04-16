@@ -1,0 +1,150 @@
+body{
+    background-color: black;
+}
+div#content{
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: center;
+    margin-top: 100px;
+}
+
+nav{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+
+}
+nav h1{
+    color: white;
+    font-family: 'Poppins', sans-serif;
+}
+
+button:hover{
+    cursor: pointer;
+}
+nav ul li{
+    display: inline;
+    margin-right: 40px; 
+   
+}     
+
+#signup{
+    background-color: white;
+    border-radius: 10px;
+    color: black;
+    height: 27px;
+    width: 80px;
+    font-size: 15px;
+
+}
+
+nav button{
+    border: none;
+    color: white;
+    background-color: black;
+    font-size: 20px;
+
+}
+
+div#imgg{
+    position: relative;
+    text-align: center;
+    color: white;
+    font-family: 'Poppins', sans-serif;
+    font-size: larger;
+
+    
+}
+ul{
+    list-style: none;
+    padding: 0;
+    margin:0;
+}
+
+
+.centered {
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Poppins', sans-serif;
+    
+    
+   
+}
+#review{
+    margin-top: 300px;
+}
+
+#review h2{
+    margin-right: 500px;
+}
+#review p{
+    color: white;
+}
+
+
+nav ul li{
+    display: inline;
+    margin-right: 40px;
+    border: none;
+}
+
+#hassle{
+   width: 400px;
+   margin-right: 200px; 
+   font-family: 'Inter', sans-serif;
+   color: white;
+
+}
+
+h2{
+    margin-left: 110px;
+    font-family: 'Inter', sans-serif;
+    font-weight: bolder;
+    color: white;
+}
+
+#one{
+    margin-left: 250px;
+    font-family: 'Inter', sans-serif;
+    color: white;
+
+}
+
+#avail{
+    width: 500px;
+    margin-left: 100px;
+    font-family: 'Inter', sans-serif;
+    color: white;
+
+}
+
+#service{
+    margin-top: 150px;
+    margin-left: 650px;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+
+}
+
+#aff{
+    margin-top: 180px;
+    margin-left: 650px;
+    font-family: 'Inter', sans-serif;
+    color: white;
+
+}
+
+#pp{
+    margin-left: 450px;
+    font-family: 'Inter', sans-serif;
+    color: white;
+
+}
+
+
+
+
+

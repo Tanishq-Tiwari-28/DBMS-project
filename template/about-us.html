@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyft Cab Services</title>
+    <link rel="stylesheet" href="../static/home.css">
+    <script src="home.js"></script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                {% if output %}
+                <li><a href="http://127.0.0.1:8000/about-us/">About Us</a></li>
+                <li><a href="http://127.0.0.1:8000/contact-us/">Contact Us</a></li>
+                <li><a href="http://127.0.0.1:8000/logout">Logout</a></li>
+                {% else %}
+                <li><a href="http://127.0.0.1:8000">Home</a></li>
+                <li><a href="http://127.0.0.1:8000/contact-us/">Contact Us</a></li>
+                {% endif %}
+                
+
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>About Lyft Cab Services</h1>
+            <p>By Tanishq and Siddharth.</p>
+
+        </section>
+        <section class="about-us">
+            <h2>About Us</h2>
+            <p>We are a cab services company committed to providing safe and reliable rides at affordable prices. With a
+                fleet of well-maintained vehicles and professional drivers, we aim to make your ride experience
+                comfortable and hassle-free.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 Cab Services. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

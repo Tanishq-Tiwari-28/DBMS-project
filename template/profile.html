@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyft Cab Services</title>
+    <link rel="stylesheet" href="../static/home.css">
+    <link rel="stylesheet" href="../static/booking.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <script>console.log(output)</script>
+                <li><a href="http://127.0.0.1:8000/logout/">Home</a></li>
+                <li><a href="http://127.0.0.1:8000/logout/about-us/">About Us</a></li>
+                <li><a href="http://127.0.0.1:8000/logout/contact-us/">Contact Us</a></li>
+                <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            {% if output %}
+            <h1>Hello {{ output.firstname}}, Book a Ride with Lyft</h1>
+            {% else %}
+            <h1>Book a Ride with Lyft</h1>
+            {% endif %}
+            <p>Safe and reliable rides at affordable prices</p>
+            <a href="http://127.0.0.1:8000/booking/" class="button">Book a Ride</a>
+        </section>
+        <div class="book-a-ride" id="book-a-ride">
+            <h2>PROFILE DETAILS</h2>
+            {% if output %}
+            <p><strong>Email: </strong>{{output.email}}</p>
+            <p><strong>Name: </strong>{{output.firstname}} {{output.lastname}}</p>
+            <p><strong>contact: </strong>{{output.phone}}</p>
+            {% else %}
+            <p><strong>Login first</p>
+            {% endif %}
+            
+            
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2023 Cab Services. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

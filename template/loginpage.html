@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyft Cab Services</title>
+    
+    <link rel="stylesheet" href="../static/home.css">
+    <link rel="stylesheet" href="../static/booking.css">
+    <link rel="stylesheet" href="../static/messages.CSS">
+    <script src="../static/messages.js"></script>
+</head>
+
+<body>
+    {% if messages %}
+    <div id="messages" class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href='http://127.0.0.1:8000/about-us/'>About Us</a></li>
+                <li><a href="http://127.0.0.1:8000/contact-us/">Contact Us</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Login on Lyft Cab Services</h1>
+            <p>Safe and reliable rides at affordable prices</p>
+        </section>
+        
+        <section class="book-a-ride" id="book-a-ride">
+            <form method="POST">
+                {% csrf_token %}
+                <label for="ride-type">Login to continue enjoying the rides:</label>
+                <br>
+                <label for="email">email:</label>
+                <input type="email" id="email" name="email">
+                <br>
+                <label for="password">password:</label>
+                <input type="password" id="password" name="password">
+                <br>
+                <!-- <label for="finalans">output:</label>
+                            <input type="number" name="finalans"> -->
+                <button type="submit" class="button">Login</button>
+                <br>
+                <a href="http://127.0.0.1:8000/signup/" class="button">Don't have an account</a>
+            </form>
+        </section>
+        
+    </main>
+    <footer>
+        <p>&copy; 2023 Cab Services. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>

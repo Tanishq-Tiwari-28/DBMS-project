@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lyft Cab Services</title>
+    <link rel="stylesheet" href="../static/home.css" />
+    <link rel="stylesheet" href="../static/booking.css" />
+    <link rel="stylesheet" href="../static/messages.CSS" />
+    <script src="../static/messages.js"></script>
+  </head>
+
+  <body>
+    {% if messages %}
+    <div id="messages" class="messages">
+      {% for message in messages %}
+      <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <header>
+      <nav>
+        <ul>
+          <li><a href="http://127.0.0.1:8000">Home</a></li>
+          <li><a href="http://127.0.0.1:8000/about-us/">About Us</a></li>
+          <li><a href="http://127.0.0.1:8000/contact-us/">Contact Us</a></li>
+          <li><a href="http://127.0.0.1:8000/login/">Login</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <section class="hero">
+        <h1>Register your Vehicle on Lyft Cab Services</h1>
+        <p>Safe and reliable rides at affordable prices</p>
+      </section>
+
+      <section class="book-a-ride" id="book-a-ride">
+        <form action="" method="POST">
+            {%csrf_token%}
+            <label for="ride-type">Register Your Vehicle:</label>
+            <br />
+            <label for="car_type">Car Type</label>
+            <select name="car_type" id="car_type">
+                <option value="SEDAN">SEDAN</option>
+                <option value="SUV">SUV</option>
+                <option value="HATCHBACK">HATCHBACK</option>
+            </select>
+            <label for="engine_no">engine_no:</label>
+            <input type="text" id="engine_no" name="engine_no" />
+            <br />
+            <label for="manufacturing_date">manufacturing_date:</label>
+            <input type="date" id="manufacturing_date" name="manufacturing_date" />
+            <br />
+            <label for="valid_till">valid till:</label>
+            <input type="date" id="valid_till" name="valid_till" />
+            <br />
+            <label for="car_model">car_model:</label>
+            <input type="text" id="car_model" name="car_model" />
+            <br />
+            <label for="car_make">car_make:</label>
+            <input type="text" id="car_make" name="car_make" />
+            <br />
+            <div id="passengers">
+            <label for="tot_passengers">tot_passengers:</label><br>
+            <input type="number" id="tot_passengers" name="tot_passengers" />
+            </div>
+            <div id="comfort">
+            <label for="comfort_level">comfort_level:</label><br>
+            <input type="number" id="comfort_level" name="comfort_level" />
+            </div>
+            <div id="road">
+            <label for="roadtype">roadtype:</label><br>
+            <input type="text" id="roadtype" name="roadtype" />
+            </div>
+            <br />
+            <button type="submit" class="button">Signup</button>
+
+          <!-- <a href="http://127.0.0.1:8000" class="button">Signup</a> -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Get a reference to the button element
+                    const  passenger = document.getElementById('passengers');
+                    const comfort = document.getElementById('comfort');
+                    const road = document.getElementById('road');
+                    // Set the display property of the button element to "none"
+                    passenger.style.display = 'none';
+                    road.style.display = 'none';
+                    console.log("sfgs")
+                    const cartype= document.getElementById('car_type');
+                    // Add an event listener to the ride type select element
+                    cartype.addEventListener("change", (event) => {
+                        if (event.target.value === "SEDAN") {
+                            comfort.style.display = "block";
+                            passenger.style.display = 'none';
+                            road.style.display = 'none';
+                        }if(event.target.value === "SUV") {
+                            comfort.style.display = "none";
+                            passenger.style.display = 'none';
+                            road.style.display = 'block';
+                        }if(event.target.value === "HATCHBACK"){
+                            comfort.style.display = "none";
+                            passenger.style.display = 'block';
+                            road.style.display = 'none';
+                        }
+                    });
+
+                });
+
+
+            </script>
+        </form>
+      </section>
+    </main>
+    <footer>
+      <p>&copy; 2023 Cab Services. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
