@@ -15,11 +15,18 @@
             <ul>
                 <script>console.log(output)</script>
                 {% if output %}
-                
-                <li><a href="about-us/">About Us</a></li>
-                <li><a href="/contact-us/">Contact Us</a></li>
-                <li><a href="http://127.0.0.1:8000/profile/">Profile</a></li>
-                <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+                    {% if output.type == 'Customer' %}
+                        <li><a href="about-us/">About Us</a></li>
+                        <li><a href="/contact-us/">Contact Us</a></li>
+                        <li><a href="http://127.0.0.1:8000/profile/">Profile</a></li>
+                        <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+                    {% else %}
+                    <li><a href="about-us/">About Us</a></li>
+                    <li><a href="/contact-us/">Contact Us</a></li>
+                    <li><a href="http://127.0.0.1:8000/profile/">Profile</a></li>
+                    <li><a href="http://127.0.0.1:8000/drequests/">Pending requests</a></li>
+                    <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+                    {% endif %}
                 {% else %}
                 <li><a href="about-us/">About Us</a></li>
                 <li><a href="/contact-us/">Contact Us</a></li>
@@ -33,13 +40,18 @@
     <main>
         <section class="hero">
             {% if output %}
-            <h1>Hello {{ output.firstname}}, Book a Ride with Lyft</h1>
+                {% if output.type == 'Customer'%}
+                    <h1>Hello {{ output.firstname}}, Book a Ride with Lyft</h1>
+                {% else %}
+                    <h1> More taxis, fewer seconds.</h1>
+                {% endif %}
             {% else %}
-            <h1>Book a Ride with Lyft</h1>
-            {% endif %}
+            <h1>Hello Book a Ride with Lyft
+            {% endif%}
             <p>Safe and reliable rides at affordable prices</p>
-            <a href="http://127.0.0.1:8000/booking/" class="button">Book a Ride</a>
-
+            {%if output.type == 'Customer'%}
+                <a href="http://127.0.0.1:8000/booking/" class="button">Book a Ride</a>
+            {% endif %}
         </section>
         <section class="services">
             <h2>Our Services</h2>

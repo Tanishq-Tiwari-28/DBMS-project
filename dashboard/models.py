@@ -123,10 +123,10 @@ class Trip(models.Model):
     trip_id = models.AutoField(primary_key=True)
     pickup_location = models.CharField(max_length=100)
     drop_location = models.CharField(max_length=100)
-    payable_amount = models.DecimalField(max_digits=10, decimal_places=0)
-    pickup_time = models.TimeField()
-    drop_time = models.TimeField()
-    date_of_trip = models.DateField()
+    payable_amount = models.DecimalField(
+        max_digits=10, decimal_places=0, blank=True, null=True)
+    pickup_time = models.TimeField(blank=True, null=True)
+    drop_time = models.TimeField(blank=True, null=True)
     mode_of_transaction = models.CharField(
         max_length=100, blank=True, null=True)
     ride_status = models.CharField(max_length=100, blank=True, null=True)
@@ -142,13 +142,6 @@ class Requests(models.Model):
     # Field name made lowercase.
     customer = models.ForeignKey(
         'Customer', models.DO_NOTHING, db_column='Customer_id', blank=True, null=True)
-    status_choices = (
-        ('P', 'Pending'),
-        ('A', 'Accepted'),
-        ('D', 'Declined'),
-    )
-    status = models.CharField(
-        max_length=1, choices=status_choices, default='P')
 
     class Meta:
         managed = False

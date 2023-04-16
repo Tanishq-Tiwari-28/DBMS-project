@@ -33,7 +33,6 @@ def get_user_data():
 
 
 def home(request):
-
     output = get_user_data()
     print(output)
     if(output):
@@ -103,7 +102,10 @@ def signup_view(request):
             with connection.cursor() as cursor:
                 cursor.execute("INSERT INTO Customer (email, pass_word, firstname, middlename, lastname, contact, DOB) VALUES (%s, %s,%s, %s, %s, %s, %s)", [
                     email, hashed_password, firstname, middlename, lastname, contact, dob])
+                customer_id = cursor.lastrowid
                 print("account created")
+                cursor.execute(
+                    "insert into customer_details(customer_id , contact) values(%s , %s)", [customer_id, contact])
                 return redirect("http://127.0.0.1:8000/login")
         output_driver = {}
         with connection.cursor() as cursor:
@@ -115,8 +117,13 @@ def signup_view(request):
             print(admin_id)
             cursor.execute("INSERT INTO driver (email,pass_word, firstname, middlename, lastname, contact, DOB , license_no , verified , verified_by) VALUES (%s,%s, %s, %s, %s, %s, %s , %s , %s ,%s)", [
                 email, hashed_password, firstname, middlename, lastname, contact, dob, license, 1, admin_id])
-            cursor
             driver_id = cursor.lastrowid
+            cursor.execute(
+                "UPDATE Admins SET verified_Driver = verified_Driver + 1 WHERE admin_id = %s;", [admin_id])
+            cursor.execute("INSERT INTO verifies(driver_id, Admin_id) VALUES(%s, %s)", [
+                           driver_id, admin_id])
+            cursor.execute(
+                "insert into driver_details(driver_id , contact) values(%s , %s)", [driver_id, contact])
             output_driver = {'driver_id': driver_id, 'firstname': firstname,
                              'middlename': middlename, 'lastname': lastname}
             print(output_driver)
@@ -147,20 +154,21 @@ def reg_vehicle(request):
 
         with connection.cursor() as cursor:
             cursor.execute(
-                "insert into Vehicle (owner_firstname, owner_middlename, owner_lastname, engine_no, date_of_manufacture, validity, car_model, car_make, car_type ,driver_id , roadtype , comfort_level , tot_passengers) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s ) ",
-                [firstname, middlename, lastname, engine_no, manufacturing_date, valid_till, car_model, car_make, type, driver_id, road, comfort, passengers])
+                "insert into Vehicle (owner_firstname, owner_middlename, owner_lastname, engine_no, date_of_manufacture, validity, car_model, car_make, car_type ,driver_id) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s ) ",
+                [firstname, middlename, lastname, engine_no, manufacturing_date, valid_till, car_model, car_make, type, driver_id])
             print("Vehicle registered")
             vehicle_id = cursor.lastrowid
-            cursor.execute("Update into SEDAN(confort_level)")
             if(type == "SEDAN"):
-                comfort = request.POST.get('comfort_level')
+                cursor.execute(
+                    "insert into sedan(vehicle_id , comfort_level) values(%s,%s)", [vehicle_id, comfort])
             elif(type == "SUV"):
-                road = request.POST.get('roadtype')
+                cursor.execute("insert into SUV(vehicle_id , roadtype) values(%s,%s)", [
+                               vehicle_id, road])
             elif(type == "HATCHBACK"):
-                passengers = request.POST.get('tot_passengers')
+                cursor.execute("insert into Hatchback(vehicle_id , tot_passengers) values(%s,%s)", [
+                               vehicle_id, passengers])
             print(vehicle_id)
-
-            return redirect("http://127.0.0.1:8000")
+            return redirect("http://127.0.0.1:8000/login")
 
     return render(request, 'regvehicle.html')
 
@@ -205,7 +213,7 @@ def Login_view(request):
             customer_id = user[6]
             print(customer_id)
             output = {'id': user[6], 'email': user[0], 'firstname': user[1], 'middlename': user[2],
-                      'lastname': user[3],  'phone': user[5]}
+                      'lastname': user[3],  'phone': user[5], 'type': user[7]}
             password_match = check_password(password, user[8])
             print(user[1])
             if password_match:
@@ -225,39 +233,34 @@ def Login_view(request):
 def booking(request):
     output = get_user_data()
     print('dsdgs')
+    print(output)
     accept_decline = {}
     if request.method == 'POST':
         from_ = request.POST['location_from']
         to_ = request.POST['location_to']
         print(from_)
         print(to_)
-
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO trips(pickup_location , drop_location , ride_status) Values(%s , %s ,%s)", [from_, to_, "PENDING"])
-            trip_id = cursor.lastrowid
-        accept_decline = {'f': from_, 't': to_, 'id': trip_id}
+        accept_decline = {'f': from_, 't': to_}
         print(accept_decline)
-        return redirect("request/", accept_decline)
-
-    return render(request, 'booking.html')
+        return redirect("request/?from={}&to={}".format(from_, to_))
+    return render(request, 'booking.html', {'output': output})
 
 
 def Request(request):
     print('in request')
-    data = request.GET.get('accept_decline')
-    print(data)
+    from_ = request.GET.get('from')
+    to_ = request.GET.get('to')
     output = get_user_data()
-    print(output['customer id'])
+    print(output)
     if(output):
         with connection.cursor() as cursor:
             cursor.execute(
-                "INSERT INTO requests(customer_id , trip_id) VALUES(%s , %s)", [output['id'], data['id']])
-        return render(request, 'request.html', {'output': data})
-
-
-def driver_requests(request):
-    return render(request, 'drequest.html')
+                "INSERT INTO trip(pickup_location , drop_location , ride_status) Values(%s , %s ,%s)", [from_, to_, "PENDING"])
+            trip_id = cursor.lastrowid
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO requests(customer_id , trip_id) VALUES(%s , %s)", [output['id'], trip_id])
+    return render(request, 'request.html',  {'output': output})
 
 
 def tracking(request):
@@ -268,9 +271,16 @@ def tracking(request):
     return render(request, 'tracking.html')
 
 
+def driver_requests(request):
+    output = get_user_data()
+    print(output)
+    if(output):
+        return render(request, 'drequest.html', {'output': output})
+
+
 def Logout_view(request):
     set_user_data(None)  # clear user data
-    return render(request, 'loginpage.html')
+    return render(request, 'thankyou.html')
 
 
 def aboutus(request):
