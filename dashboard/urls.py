@@ -25,6 +25,7 @@ urlpatterns = [
     path('about-us/', aboutus),
     path('contact-us/', contactus),
     path('profile/', profile),
+    path('goodbye/',account_delete)
 
 
 ]

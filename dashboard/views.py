@@ -40,12 +40,6 @@ def home(request):
     return render(request, 'home.html')
 
 
-def profile(request):
-    output = get_user_data()
-    print(output)
-    return render(request, 'profile.html', {'output': output})
-
-
 def usertype(request):
     return render(request, 'usertype.html')
 
@@ -310,6 +304,28 @@ def tracking(request):
     data = request.GET.get('data')
     print(data)
     return render(request, 'tracking.html')
+
+
+def profile(request):
+    output = get_user_data()
+    print(output)
+    if(request.method == "POST"):
+        if(output['type'] == 'Customer'):
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "delete from Customer where customer_id = %s ", [output['id']])
+            return redirect("http://127.0.0.1:8000/goodbye")
+        if(output['type'] == 'Driver'):
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "delete from driver where driver_id = %s ", [output['id']])
+            return redirect("http://127.0.0.1:8000/goodbye")
+    return render(request, 'profile.html', {'output': output})
+
+
+def account_delete(request):
+    output = get_user_data()
+    return render(request, 'goodbye.html', {'output': output})
 
 
 def Logout_view(request):

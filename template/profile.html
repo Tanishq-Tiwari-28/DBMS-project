@@ -7,6 +7,7 @@
     <title>Lyft Cab Services</title>
     <link rel="stylesheet" href="../static/home.css">
     <link rel="stylesheet" href="../static/booking.css">
+    <link rel="stylesheet" href="../static/requests.css">
 </head>
 
 <body>
@@ -40,8 +41,12 @@
             {% else %}
             <p><strong>Login first</p>
             {% endif %}
-            
-            
+            <form method="POST" action="">
+                {% csrf_token %}
+                <td>
+                    <button name="delete_user" type="submit" class="delete_user">Delete the Account</button>
+                </td>
+            </form>
         </div>
     </main>
     <footer>
