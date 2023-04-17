@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.contrib.auth.models import User
 # from dashboard.managers import CustomUserManager
+from django.dispatch import Signal
+request_made = Signal()
 
 
 class Admins(models.Model):
@@ -154,7 +156,6 @@ class AcceptOrDecline(models.Model):
         'Driver', models.DO_NOTHING, blank=True, null=True)
     trip = models.OneToOneField(
         'Trip', models.DO_NOTHING, blank=True, primary_key=True)
-    is_accepted = models.BooleanField(default=False)
 
     class Meta:
         managed = False

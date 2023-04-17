@@ -17,6 +17,7 @@ urlpatterns = [
     path('signup/vehicle', reg_vehicle),
     path('booking/', booking),
     path('booking/request/', Request),
+    path('request/dtracking', driver_tracking),
     path('booking/request/tracking/', tracking),
     path('drequests/', driver_requests),
     path('login/', Login_view),

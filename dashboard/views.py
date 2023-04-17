@@ -16,7 +16,7 @@ from django.contrib.auth.hashers import make_password, BCryptSHA256PasswordHashe
 # from django.urls import reverse
 # from django.contrib.auth import logout
 # from .forms import SignupForm
-
+from .models import request_made
 user_data = None
 
 
@@ -252,6 +252,7 @@ def Request(request):
     to_ = request.GET.get('to')
     output = get_user_data()
     print(output)
+    output2 = {'from': from_, 'to': to_, 'output': output}
     if(output):
         with connection.cursor() as cursor:
             cursor.execute(
@@ -260,7 +261,47 @@ def Request(request):
         with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO requests(customer_id , trip_id) VALUES(%s , %s)", [output['id'], trip_id])
-    return render(request, 'request.html',  {'output': output})
+    # Emit custom signal
+    # request_made.send(sender=request.user, request=request)
+    return render(request, 'request.html',  {'output': output2})
+
+
+def driver_requests(request):
+    print('in driver requests')
+    output = get_user_data()
+    if(output):
+        print(output)
+        with connection.cursor() as cursor2:
+            print("INquery")
+            cursor2.execute(
+                "SELECT * FROM requests r JOIN trip t ON r.trip_id=t.trip_id;")
+            print("outquery")
+            data = cursor2.fetchall()
+        output2 = {'output': output, 'data': data}
+        print(output2)
+        if(request.method == "POST"):
+            if 'accept' in request.POST:
+                accept = request.POST['accept']
+                print(accept)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "INSERT INTO accept_or_decline VALUES(%s, %s);", [output['id'], data[0][0]])
+                return redirect("http://127.0.0.1:8000/request/dtracking")
+            if 'decline' in request.POST:
+                decline = request.POST['decline']
+                print(decline)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM requests WHERE trip_id = %s ", [data[0][0]])
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE trip SET ride_status = 'Cancelled' WHERE trip_id=%s", [data[0][0]])
+                    return redirect("http://127.0.0.1:8000/drequests/")
+        return render(request, 'drequest.html', {'output2': output2})
+
+
+def driver_tracking(request):
+    return render(request, 'dtracking.html')
 
 
 def tracking(request):
@@ -271,15 +312,9 @@ def tracking(request):
     return render(request, 'tracking.html')
 
 
-def driver_requests(request):
-    output = get_user_data()
-    print(output)
-    if(output):
-        return render(request, 'drequest.html', {'output': output})
-
-
 def Logout_view(request):
     set_user_data(None)  # clear user data
+    print(user_data)
     return render(request, 'thankyou.html')
 
 

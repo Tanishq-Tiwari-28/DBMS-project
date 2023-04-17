@@ -1,0 +1,48 @@
+.requests {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 50px auto;
+    max-width: 800px;
+}
+
+.requests table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+
+.requests td {
+    padding: 10px;
+    text-align: left;
+}
+
+.requests th {
+    background-color: #f2f2f2;
+}
+
+.requests tbody tr:hover {
+    background-color: #f2f2f2;
+}
+
+.requests button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+.requests button {
+    display: inline-block;
+}
+.requests button:hover {
+    background-color: #3e8e41;
+}
+
+.requests .hidden {
+    display: none;
+}

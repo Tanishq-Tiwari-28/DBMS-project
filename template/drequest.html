@@ -7,6 +7,7 @@
     <title>Lyft Cab Services</title>
     <link rel="stylesheet" href="../static/home.css">
     <link rel="stylesheet" href="../static/booking.css">
+    <link rel="stylesheet" href="../static/requests.css">
 </head>
 
 <body>
@@ -22,35 +23,51 @@
         </nav>
     </header>
     <main>
+        <!-- drequest.html -->
+        
         <section class="hero">
-            <h1>Hello {{output.firstname}} , Drive Safely....</h1>
-            <p>Check for the pending requests.</p>        
+            <h1>Hello {{ output2.output.firstname }}, Drive Safely....</h1>
+            <p>Check for the pending requests.</p>
         </section>
-        <section class="services">
+        
+        <section class="requests">
             <h2>Pending Requests</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Customer Name</th>
-                        <th>Location</th>
-                        <th>Time Away</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Jane Doe</td>
-                        <td>123 Main St</td>
-                        <td>10 minutes</td>
-                    </tr>
-                    <tr>
-                        <td>John Smith</td>
-                        <td>456 Oak Ave</td>
-                        <td>5 minutes</td>
-                    </tr>
-                    <!-- Add more rows for additional requests -->
-                </tbody>
-            </table>
+            {% if output2.data.0 == none %}
+                No Customers Nearby
+            {% else %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Location</th>
+                            <th>Time Away</th>
+                            <th>Distance Away</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for request in output2.data %}
+                        <tr>
+                            <td>{{ output2.output.firstname }}</td>
+                            <td>{{ request.4 }}</td>
+                            <td>{{ 15 }}mins</td>
+                            <td>{{ 3 }}km</td>
+                            <form method="POST"></form>
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <td>
+                                    <button name="accept"  type="submit" class="accept">Accept</button>
+                                    <button name="decline" type="submit" class="decline">Decline</button>
+                                </td>
+                            </form>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
         </section>
+
+
+
 
 
     </main>
