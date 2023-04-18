@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyft Cab Services</title>
+    <link rel="stylesheet" href="bookingcss.css">
+    <link rel="stylesheet" href="homecss.css">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.13.0/mapbox-gl.js"></script>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="http://127.0.0.1:8000/about-us/">About Us</a></li>
+                <li><a href="http://127.0.0.1:8000/contact-us/">Contact Us</a></li>
+                <li><a href="logout/">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Book a Ride with Lyft</h1>
+            <p>Safe and reliable rides at affordable prices</p>
+        </section>
+        <section class="book-a-ride" id="book-a-ride">
+            <h2>Book a Ride</h2>
+            <form action="/payment" method="GET">
+                <label for="ride-type">Choose a Ride:</label>
+                <select name="ride-type" id="ride-type">
+                    <option value="lyft-moto">Lyft a Moto</option>
+                    <option value="lyft-sedan">Lyft a Sedan</option>
+                    <option value="lyft-suv">Lyft a SUV</option>
+                    <option value="lyft-hatchback">Lyft a Hatchback</option>
+                </select>
+                <br>
+                <label for="location-from">From:</label>
+                <input type="text" id="location-from" name="location-from">
+                <br>
+                <label for="location-to">To:</label>
+                <input complete this code type="text" id="location-to" name="location-to">
+                <br>
+                <div id='map' style='width: 100%; height: 400px;'></div>
+                <script>
+                    var main_data={
+                        loc_name : "",
+                        distance : 0
+                    };
+                    
+            
+            
+                  mapboxgl.accessToken = 'pk.eyJ1IjoidGFuaXNocS0yOCIsImEiOiJjbGY2a245Z2Mxbm52NDBzOTAzd21lOXdoIn0.t54Xj-liRz-dB8fCEoPW5A';
+            
+                  navigator.geolocation.getCurrentPosition(function(position) {
+                    var currentLocation = [position.coords.longitude, position.coords.latitude];
+                    var map = new mapboxgl.Map({
+                      container: 'map',
+                      style: 'mapbox://styles/mapbox/streets-v11',
+                      center: currentLocation,
+                      zoom: 12
+                    });
+            
+                    // Add current location marker
+                    var marker = new mapboxgl.Marker()
+                      .setLngLat(currentLocation)
+                      .addTo(map);
+            
+                    // Add click event listener to map
+                    map.on('click', function(event) {
+                      var newLocation = [event.lngLat.lng, event.lngLat.lat];
+                      console.log(newLocation)
+                      var lngLat = event.lngLat;
+                      var url1 = 'https://api.mapbox.com/geocoding/v5/mapbox.places/' + lngLat.lng + ',' + lngLat.lat + '.json?access_token=' + mapboxgl.accessToken;
+                      // Remove previous marker
+                      
+                    fetch(url1)
+                    .then(response => response.json())
+                    .then(data =>{
+                        var locationName = data.features[0].place_name;
+                        console.log(locationName);
+                        const s = document.getElementById("location-input");
+                        s.value = locationName
+                        main_data.loc_name = locationName;
+                    }) ;
+            
+                      if (marker) {
+                        marker.remove();
+                      }
+            
+                      // Add new marker
+                      marker = new mapboxgl.Marker()
+                        .setLngLat(newLocation)
+                        .addTo(map);
+            
+                      // Store location string in variable
+                      var locationString = JSON.stringify(newLocation);
+                      console.log(locationString)
+                      // Draw driving path from current location to new location
+                      var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + currentLocation[0] + ',' + currentLocation[1] + ';' + newLocation[0] + ',' + newLocation[1] + '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken;
+                      console.log(currentLocation[0],currentLocation[1]);
+                      console.log(newLocation[0],newLocation[1]);
+                      var url1 = 'https://api.mapbox.com/directions/v5/mapbox/driving/'+currentLocation[0]+','+currentLocation[1]+';'+newLocation[0]+','+newLocation[1]+'?geometries=geojson&access_token=pk.eyJ1Ijoib20yMTQ4MSIsImEiOiJjbGRobTBreDUxM2w1M3F0NTd4ZG01ZXEzIn0.l7-GFstLQOdYhnkUMbHukQ';
+                      console.log(url1);
+                      var req = new XMLHttpRequest();
+                      req.open('GET', url, true);
+                      req.onload = function() {
+                        var json = JSON.parse(req.response);
+                        var data = json.routes[0];
+                        var route = data.geometry.coordinates;
+                        var geojson = {
+                          type: 'Feature',
+                          properties: {},
+                          geometry: {
+                            type: 'LineString',
+                            coordinates: route
+                          }
+                        };
+                        req.open('GET', url1, true);
+                        req.onload = function() {
+                        if (req.status == 200) {
+                            var response = JSON.parse(req.response);
+                            var distance = response.routes[0].distance;
+
+                            // distance stored here
+                            console.log(distance);
+                            
+                            const s1 = document.getElementById("dist");
+                            s1.value = distance
+                            main_data.distance = distance;
+
+                            const s2 = document.getElementById("final_d");
+                            s2.value = JSON.stringify(main_data)
+            
+                            }
+                        };
+                        req.send();                        
+                        
+                       
+                    
+            
+                        // If the route already exists on the map, reset it using setData
+                        if (map.getSource('route')) {
+                          map.getSource('route').setData(geojson);
+                        } else { // Otherwise, create a new source and add it to the map
+                          map.addSource('route', {
+                            type: 'geojson',
+                            data: geojson
+                          });
+            
+                          // Add layer for route
+                          map.addLayer({
+                            id: 'route',
+                            type: 'line',
+                            source: 'route',
+                            layout: {
+                              'line-join': 'round',
+                              'line-cap': 'round'
+                            },
+                            paint: {
+                              'line-color': '#3887be',
+                              'line-width': 5,
+                              'line-opacity': 0.75
+                            }
+                          });
+                        }
+                      };
+                      req.send();
+            
+                      // Center map on new location
+                      map.flyTo({
+                        center: newLocation,
+                        zoom: 12
+                      });
+                      
+                        });
+                  });
+                </script>
+                <!-- <script>
+                    mapboxgl.accessToken = 'pk.eyJ1IjoidGFuaXNocS0yOCIsImEiOiJjbGY2a245Z2Mxbm52NDBzOTAzd21lOXdoIn0.t54Xj-liRz-dB8fCEoPW5A';
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        var currentLocation = [position.coords.longitude, position.coords.latitude];
+                        var map = new mapboxgl.Map({
+                            container: 'map',
+                            style: 'mapbox://styles/mapbox/streets-v11',
+                            center: currentLocation,
+                            zoom: 12
+                        });
+                    // creating a default marker
+                    // const marker1 = new mapboxgl.Marker()
+                    //     .setLngLat([77.2732, 28.5459,])
+
+                    //     .addTo(map)
+
+                    //create another marker
+                    // const marker2 = new mapboxgl.Marker({ color: 'black' })
+                    //     .setLngLat([77.2588316754126, 28.553727880517794])
+                    //     .addTo(map);
+
+
+                    
+
+                        const marker = new mapboxgl.Marker({
+                            draggable: true
+                        })
+                            .setLngLat([77.2588316754126, 28.553727880517794])
+                            .addTo(map);
+
+
+                        function onDragEnd() {
+                            const lngLat = marker.getLngLat();
+                            coordinates.style.display = 'block';
+                            coordinates.innerHTML = `Longitude: ${lngLat.lng}<br />Latitude: ${lngLat.lat}`;
+                        }
+
+                        marker.on('dragend', onDragEnd);
+
+                        map.on('load', () => {
+                            map.addSource('route', {
+                                'type': 'geojson',
+                                'data': {
+                                    'type': 'Feature',
+                                    'properties': {},
+                                    'geometry': {
+                                        'type': 'LineString',
+                                        'coordinates': [[77.273215, 28.545932], [77.272892, 28.54605], [77.272866, 28.546789], [77.27233, 28.547058], [77.271985, 28.547498], [77.269418, 28.546098], [77.268634, 28.546013], [77.268069, 28.545726], [77.267985, 28.545056], [77.264476, 28.54439], [77.264544, 28.544028], [77.264669, 28.54375], [77.264505, 28.54369], [77.262225, 28.549368], [77.263184, 28.549878], [77.263722, 28.55067], [77.264869, 28.553723], [77.265494, 28.554873], [77.264907, 28.55608], [77.260607, 28.560793], [77.258245, 28.561879], [77.256739, 28.561903], [77.256801, 28.559729], [77.255484, 28.557967], [77.257607, 28.555894], [77.258841, 28.555184]]
+                                    }
+                                }
+                            });
+                        
+                            var url = 'https://api.mapbox.com/directions/v5/mapbox/driving/' + 77.2732 + ',' + 28.5459 + ';' + 77.2588316754126 + ',' + 28.553727880517794 + '?geometries=geojson&access_token=pk.eyJ1Ijoib20yMTQ4MSIsImEiOiJjbGRobTBreDUxM2w1M3F0NTd4ZG01ZXEzIn0.l7-GFstLQOdYhnkUMbHukQ';
+                            map.addLayer({
+                                'id': 'route',
+                                'type': 'line',
+                                'source': 'route',
+                                'layout': {
+                                    'line-join': 'round',
+                                    'line-cap': 'round'
+                                },
+                                'paint': {
+                                    'line-color': '#888',
+                                    'line-width': 8
+                                }
+                            });
+                        });
+                    });
+                </script> -->
+                <br>
+                <button type="submit" class="button">BOOK</button>
+
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>Copyright © Lyft Cab Services
+        </p>
+    </footer>
+
+</body>
+
+</html>

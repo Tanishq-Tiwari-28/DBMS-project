@@ -1,3 +1,5 @@
+import json
+from django.http import JsonResponse
 from django.db import connection
 from urllib.parse import urlencode
 # import mysql.connector
@@ -34,6 +36,7 @@ def get_user_data():
 
 def home(request):
     output = get_user_data()
+    type = request.GET.get('user_type')
     print(output)
     if(output):
         return render(request, 'home.html', {'output': output})
@@ -204,8 +207,6 @@ def Login_view(request):
         user = cursor.fetchone()
         print(user)
         if user is not None:
-            customer_id = user[6]
-            print(customer_id)
             output = {'id': user[6], 'email': user[0], 'firstname': user[1], 'middlename': user[2],
                       'lastname': user[3],  'phone': user[5], 'type': user[7]}
             password_match = check_password(password, user[8])
@@ -214,7 +215,7 @@ def Login_view(request):
                 print("matched")
                 # setting logged in USER to global variable
                 set_user_data(output)
-                return redirect("http://127.0.0.1:8000/")
+                return redirect("http://127.0.0.1:8000")
             else:
                 print("not matched")
                 messages.error(request, 'Invalid login credentials')
@@ -246,6 +247,15 @@ def Request(request):
     to_ = request.GET.get('to')
     output = get_user_data()
     print(output)
+    # data = json.loads(request.body)
+    # distance = data.get('distance')
+    # new_locationlat = data.get('new_locationlat')
+    # current_locationlat = data.get('current_locationlat')
+    # new_locationlong = data.get('new_locationlong')
+    # current_locationlong = data.get('current_locationlong')
+    # trip_data = {"d": distance, 'nlat': new_locationlat, 'nlong': new_locationlong,
+    #              'clat': current_locationlat, 'clong': current_locationlong}
+    # print(trip_data)
     output2 = {'from': from_, 'to': to_, 'output': output}
     if(output):
         with connection.cursor() as cursor:
@@ -255,6 +265,19 @@ def Request(request):
         with connection.cursor() as cursor:
             cursor.execute(
                 "INSERT INTO requests(customer_id , trip_id) VALUES(%s , %s)", [output['id'], trip_id])
+    if(request.method == "POST"):
+        if 'cancel_request' in request.POST:
+            cancel_request = request.POST['cancel_request']
+            print(cancel_request)
+            with connection.cursor() as cursor:
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM requests WHERE trip_id = %s ", [trip_id])
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE trip SET ride_status = 'Cancelled' WHERE trip_id=%s", [trip_id])
+            return redirect("http://127.0.0.1:8000/booking")
+
     # Emit custom signal
     # request_made.send(sender=request.user, request=request)
     return render(request, 'request.html',  {'output': output2})
@@ -281,6 +304,7 @@ def driver_requests(request):
                     cursor.execute(
                         "INSERT INTO accept_or_decline VALUES(%s, %s);", [output['id'], data[0][0]])
                 return redirect("http://127.0.0.1:8000/request/dtracking")
+
             if 'decline' in request.POST:
                 decline = request.POST['decline']
                 print(decline)
@@ -306,26 +330,135 @@ def tracking(request):
     return render(request, 'tracking.html')
 
 
+def payment(request):
+    output = get_user_data()
+    return render(request, 'payment.html')
+
+
 def profile(request):
     output = get_user_data()
     print(output)
     if(request.method == "POST"):
-        if(output['type'] == 'Customer'):
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "delete from Customer where customer_id = %s ", [output['id']])
-            return redirect("http://127.0.0.1:8000/goodbye")
-        if(output['type'] == 'Driver'):
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "delete from driver where driver_id = %s ", [output['id']])
-            return redirect("http://127.0.0.1:8000/goodbye")
+        if 'update_user' in request.POST:
+            return redirect("http://127.0.0.1:8000/updateprofile")
+        elif('add_phone' in request.POST):
+            return redirect("http://127.0.0.1:8000/addphone")
+        else:
+            if(output['type'] == 'Customer'):
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "delete from Customer where customer_id = %s ", [output['id']])
+                return redirect("http://127.0.0.1:8000/goodbye")
+            if(output['type'] == 'Driver'):
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "delete from driver where driver_id = %s ", [output['id']])
+                return redirect("http://127.0.0.1:8000/goodbye")
     return render(request, 'profile.html', {'output': output})
 
 
 def account_delete(request):
+    set_user_data(None)
+    return render(request, 'goodbye.html')
+
+
+def updateprofile(request):
     output = get_user_data()
-    return render(request, 'goodbye.html', {'output': output})
+    if(request.method == "POST"):
+        firstname = request.POST['firstname']
+        lastname = request.POST['lastname']
+        phone = request.POST['phone']
+
+        if 'update_profile' in request.POST:
+            if(output['type'] == 'Customer'):
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        '''
+                        UPDATE Customer SET firstname=%s, lastname=%s, contact=%s WHERE customer_id=%s;
+                        ''', [firstname, lastname, phone, output['id']]
+                    )
+
+                    cursor.execute(
+                        "update customer_details set contact=%s where customer_id=%s;", [phone, output['id']])
+                    output['firstname'] = firstname
+                    output['lastname'] = lastname
+                    output['phone'] = phone
+                return redirect("http://127.0.0.1:8000/profile", {})
+            elif(output['type'] == 'driver'):
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        '''
+                        UPDATE driver SET firstname='%s', lastname='%s', contact='%s' WHERE idriver_d=%s;
+
+                        ''', [firstname, lastname, phone, output['id']]
+                    )
+                    cursor.execute(
+                        "update driver_details set contact=%s where driver_id=%s;", [phone, output['id']])
+                    output['firstname'] = firstname
+                    output['lastname'] = lastname
+                    output['phone'] = phone
+                return redirect("http://127.0.0.1:8000/profile")
+    return render(request, 'updateprofile.html')
+
+
+def addphone(request):
+    output = get_user_data()
+    if(request.method == "POST"):
+        phone = request.POST.get('add_phone')
+        if(output['type'] == 'Customer'):
+            print(output['id'])
+            print(phone)
+            with connection.cursor() as cursor:
+                cursor.execute("insert into customer_details(customer_id , contact) values(%s , %s)", [
+                               output['id'], phone])
+                output['phone'] = phone
+            return redirect("http://127.0.0.1:8000/profile")
+        elif(output['type'] == 'driver'):
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    '''
+                        INSERT INTO driver_details(contact , driver_id) VALUES(%s , %s);
+                    ''', [phone, output['id']]
+                )
+                output['phone'] = phone
+            return redirect("http://127.0.0.1:8000/profile")
+
+    return render(request, 'addphone.html')
+
+
+def passwordchange(request):
+    if(request.method == "POST"):
+        newpass = request.POST["password"]
+        confirmpass = request.POST["cpassword"]
+        email = request.POST["email"]
+        print(email)
+        print(newpass)
+        print(confirmpass)
+        with connection.cursor() as cursor:
+            cursor.execute(
+                '''
+                SELECT 'driver' as user_type, pass_word FROM driver WHERE email = %s 
+                UNION ALL 
+                SELECT 'customer' as user_type, pass_word FROM customer WHERE email = %s;
+                ''', [email, email]
+            )
+            data = cursor.fetchone()
+        print(data)
+        if(newpass != confirmpass):
+            messages.error(request, 'Password Does not match..Try again')
+        else:
+            if(data[0] == 'customer'):
+                newpass = make_password(confirmpass)
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "update Customer set pass_word = %s", [newpass])
+                return redirect("http://127.0.0.1:8000/login")
+            elif(data[0] == 'driver'):
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "update driver set pass_word = %s", [newpass])
+                return render("http://127.0.0.1:8000/login")
+    return render(request, 'passwordchange.html')
 
 
 def Logout_view(request):
@@ -342,11 +475,6 @@ def aboutus(request):
 def contactus(request):
     output = get_user_data()
     return render(request, 'contact-us.html')
-
-
-def payment(request):
-    output = get_user_data()
-    return render(request, 'payment.html')
 
 
 # def table(request):

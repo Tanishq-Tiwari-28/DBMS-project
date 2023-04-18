@@ -8,11 +8,15 @@ from . import views
 urlpatterns = [
     path('', home),
     # path('show_session/', SessionWizardView.as_view(), name='show_session'),
-    path('<int:count>/', home),
+    path('customer/', home),
+    path('driver/', home),
     # path('tables/', table),
     path('logout/', Logout_view),
     # path('login/<str:count>', login2),
     path('type/', usertype),
+    path('passwordchange/', passwordchange),
+    path('updateprofile/', updateprofile),
+    path('addphone/', addphone),
     path('signup/', signup_view),
     path('signup/vehicle', reg_vehicle),
     path('booking/', booking),
@@ -25,7 +29,5 @@ urlpatterns = [
     path('about-us/', aboutus),
     path('contact-us/', contactus),
     path('profile/', profile),
-    path('goodbye/',account_delete)
-
-
+    path('goodbye/', account_delete)
 ]
