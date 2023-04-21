@@ -265,6 +265,8 @@ def Request(request):
     tlon = request.GET.get('tlon')
     tlat = request.GET.get('tlat')
     dist = request.GET.get('d')
+    time = float(dist)/660
+    fare = float(dist)*0.002
     address = request.GET.get('address')
     output = get_user_data()
     print(output)
@@ -298,7 +300,7 @@ def Request(request):
                     "select * from accept_or_decline where trip_id =%s", [trip_id])
                 refresh_data = cursor.fetchone()
             if(refresh_data is not None):
-                return redirect("http://127.0.0.1:" + str(port_no) + "tracking/?dist={}".format(dist))
+                return redirect("tracking/?dist={}&fare={}&time={}".format(dist, fare, time))
             else:
                 messages.error(request, "No Driver nearby please wait")
         if 'cancel_request' in request.POST:
@@ -330,7 +332,7 @@ def driver_requests(request):
             print("outquery")
             data = cursor2.fetchall()
             if(data):
-                time = int(data[0][2])/660
+                time = int(data[-1][2])/660
                 output2 = {'output': output, 'data': data, 'time': time}
             else:
                 output2 = {'output': output, 'data': data}
@@ -342,9 +344,9 @@ def driver_requests(request):
                 print(accept)
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "INSERT INTO accept_or_decline VALUES(%s, %s);", [output['id'], data[0][0]])
+                        "INSERT INTO accept_or_decline VALUES(%s, %s);", [output['id'], data[-1][0]])
                     cursor.execute(
-                        "select * from requests where trip_id = %s", [data[0][0]])
+                        "select * from requests where trip_id = %s", [data[-1][0]])
                     rdata = cursor.fetchone()
                     print(rdata)
                     time = int(rdata[2])/660
@@ -366,10 +368,10 @@ def driver_requests(request):
                 print(decline)
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "DELETE FROM requests WHERE trip_id = %s ", [data[0][0]])
+                        "DELETE FROM requests WHERE trip_id = %s ", [data[-1][0]])
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "UPDATE trip SET ride_status = 'Cancelled' WHERE trip_id=%s", [data[0][0]])
+                        "UPDATE trip SET ride_status = 'Cancelled' WHERE trip_id=%s", [data[-1][0]])
                     return redirect("http://127.0.0.1:" + str(port_no) + "/drequests/")
 
         return render(request, 'drequest.html', {'output2': output2})
@@ -403,13 +405,13 @@ def tracking(request):
     output = get_user_data()
     print(output)
     print('in tracking')
-    data = request.GET.get('data')
-    print(data)
-    dict = request.GET.get("dict")
-    print(dict)
-    time = int(dict)/660
-    fare = int(dict)*0.002
-    result_dict = {'dict': dict, 'time': time, 'fare': fare}
+    # data = request.GET.get('data')
+    # print(data)
+    dist = request.GET.get("dist")
+    time = request.GET.get("time")
+    fare = request.GET.get("fare")
+    print(dist)
+    result_dict = {'dist': dist, 'time': time, 'fare': fare}
     return render(request, 'tracking.html', {"result": result_dict})
 
 
