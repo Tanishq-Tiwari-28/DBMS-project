@@ -144,6 +144,16 @@ class Requests(models.Model):
     # Field name made lowercase.
     customer = models.ForeignKey(
         'Customer', models.DO_NOTHING, db_column='Customer_id', blank=True, null=True)
+    distance = models.FloatField(blank=True, null=True)
+    from_lat = models.DecimalField(
+        max_digits=8, decimal_places=6, blank=True, null=True)
+    to_lat = models.DecimalField(
+        max_digits=8, decimal_places=6, blank=True, null=True)
+    from_lon = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True)
+    to_lon = models.DecimalField(
+        max_digits=9, decimal_places=6, blank=True, null=True)
+    address = models.CharField(max_length=100, blank=True, null=True)
 
     class Meta:
         managed = False

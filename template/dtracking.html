@@ -15,24 +15,24 @@
     <header>
         <nav>
             <ul>
-                <li><a href="http://127.0.0.1:8000/about-us/">About Us</a></li>
-                <li><a href="http://127.0.0.1:8000/contact-us/">Contact Us</a></li>
-                <li><a href="logout/">Logout</a></li>
+                <li><a href="/about-us/">About Us</a></li>
+                <li><a href="/contact-us/">Contact Us</a></li>
+                <li><a href="/logout/">Logout</a></li>
             </ul>
         </nav>
     </header>
     <main>
         <section class="hero">
-            <h1>{{output.firstname}}Track a Ride with Lyft</h1>
+            <h1>{{output.output.firstname}}Track a Ride with Lyft</h1>
             <p>Safe and reliable rides at affordable prices</p>
         </section>
         <section class="book-a-ride" id="book-a-ride">
             <h2>Track your Ride</h2>
                 <div id='map' style='width: 100%; height: 400px;'></div>
                 <h2>Trip details</h2>
-                <p><strong>Distance Away: </strong>4 km </p>
-                <p><strong>Time Away:</strong>14 min</p>
-                <p><strong>FARE:</strong>100 Rs</p>
+                <p><strong>Distance Away: </strong>{{output.dist}} meters</p>
+                <p><strong>Time Away: </strong>{{output.time}} mins</p>
+                <p><strong>FARE: </strong>{{output.fare}} Rs</p>
                 <br>
                 <script>
                     mapboxgl.accessToken = 'pk.eyJ1IjoidGFuaXNocS0yOCIsImEiOiJjbGY2a245Z2Mxbm52NDBzOTAzd21lOXdoIn0.t54Xj-liRz-dB8fCEoPW5A';

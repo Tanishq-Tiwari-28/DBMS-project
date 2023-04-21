@@ -15,40 +15,54 @@
         <nav>
             <ul>
                 <script>console.log(output)</script>
-                <li><a href="http://127.0.0.1:8000/logout/">Home</a></li>
-                <li><a href="http://127.0.0.1:8000/logout/about-us/">About Us</a></li>
-                <li><a href="http://127.0.0.1:8000/logout/contact-us/">Contact Us</a></li>
-                <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about-us/">About Us</a></li>
+                <li><a href="/contact-us/">Contact Us</a></li>
+                <li><a href="/logout/">Logout</a></li>
             </ul>
         </nav>
     </header>
     <main>
         <section class="hero">
             {% if output %}
-            <h1>Hello {{ output.firstname}}, Book a Ride with Lyft</h1>
+            <h1>Hello {{ output.profile.2}}, Book a Ride with Lyft</h1>
             {% else %}
             <h1>Book a Ride with Lyft</h1>
             {% endif %}
             <p>Safe and reliable rides at affordable prices</p>
-            <a href="http://127.0.0.1:8000/booking/" class="button">Book a Ride</a>
+            {% if output.user.type == 'Customer' %}
+                <a href="/booking/" class="button">Book a Ride</a>
+            {% endif %}
+            
         </section>
         <div class="book-a-ride" id="book-a-ride">
             <h2>PROFILE DETAILS</h2>
             {% if output %}
-            <p><strong>Email: </strong>{{output.email}}</p>
-            <p><strong>Name: </strong>{{output.firstname}} {{output.lastname}}</p>
-            <p><strong>contact: </strong>{{output.phone}}</p>
+                <p><strong>id: </strong>{{output.profile.0}}</p>
+                <p><strong>Email: </strong>{{output.profile.1}}</p>
+                <p><strong>Full Name: </strong>{{output.profile.2}} {{output.profile.3}} {{output.profile.4}}</p>
+                <p><strong>contact: </strong>{{output.profile.5}}</p>
+                <p><strong>DOB: </strong>{{output.profile.6}}</p>
+                <p><strong>Age: </strong>{{output.profile.7}}</p>
+
             {% else %}
             <p><strong>Login first</p>
             {% endif %}
             <form method="POST" action="">
                 {% csrf_token %}
                 <td>
+                    {% if output.user.type == 'Driver' %}
+                    <button name="view_vehicle" type="submit" class="view_vehicle">Vehicle Details</button>
+                    {% endif %}
+                    <br>
                     <button name="add_phone" type="submit" class="add_phone">Add contact number</button>
                     <br>
                     <button name="update_user" type="submit" class="update_user">Update Profile</button>
                     <br>
                     <button name="delete_user" type="submit" class="delete_user">Delete the Account</button>
+                    <br>
+
+                    
                 </td>
             </form>
         </div>

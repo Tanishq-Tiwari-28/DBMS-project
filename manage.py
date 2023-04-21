@@ -3,8 +3,18 @@
 import os
 import sys
 
+from dashboard.globals import update_global, port_no
+
 
 def main():
+    # if(len(sys.argv == ))
+    print(sys.argv)
+    print(len(sys.argv))
+    if(len(sys.argv) > 2):
+        update_global(sys.argv[2])
+    elif(len(sys.argv) == 2):
+        update_global(8000)
+    print(port_no)
     """Run administrative tasks."""
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'test1.settings')
     try:

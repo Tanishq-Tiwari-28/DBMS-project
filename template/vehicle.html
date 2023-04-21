@@ -24,22 +24,23 @@
     </header>
     <main>
         <section class="hero">
-            {% if output %}
-            <h1>Hello {{ output.firstname}}, Book a Ride with Lyft</h1>
-            {% else %}
-            <h1>Book a Ride with Lyft</h1>
-            {% endif %}
-            <p>Safe and reliable rides at affordable prices</p>
-            <a href="/booking/" class="button">Book a Ride</a>
+            
+            <h1>Hello {{ output.owner_firstname}} </h1>
+            <p> CHECK YOUR VEHICLES DETAILS</p>
+
         </section>
         <div class="book-a-ride" id="book-a-ride">
-            <h1>Add Phone number</h1>
-            <form method="POST">
-                {% csrf_token %}
-                <label for="add_phone">Contact: </label>
-                <input type="number" name="add_phone"><br><br>
-                <button type="submit">Add</button>
-            </form>
+
+            <h2>Vehicle DETAILS</h2>
+            <p><strong>id: </strong>{{output.id}}</p>
+            <p><strong>Owner Full Name: </strong>{{output.owner_firstname}} {{output.owner_middlename}} {{output.owner_lastname}}</p>
+            <p><strong>Engine no: </strong>{{output.engine_no}}</p>
+            <p><strong>Type: </strong>{{output.type}}</p>
+            <p><strong>Make: </strong>{{output.make}}</p>
+            <p><strong>Model: </strong>{{output.model}}</p>
+            <p><strong>Date of manufacturing: </strong>{{output.date_of_manufacture}}</p>
+            <p><strong>Valid Till: </strong>{{output.validity}}</p>
+            
         </div>
     </main>
     <footer>

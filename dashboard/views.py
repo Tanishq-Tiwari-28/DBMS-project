@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.contrib.auth.models import User
 from .models import Customer, Driver
 # Create your views here.
+from dashboard.globals import port_no
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth import authenticate
 from django.contrib.auth import login, logout
@@ -35,6 +36,7 @@ def get_user_data():
 
 
 def home(request):
+    print("views", port_no)
     output = get_user_data()
     type = request.GET.get('user_type')
     print(output)
@@ -59,73 +61,82 @@ def signup_view(request):
         contact = request.POST.get('contact')
         dob = request.POST.get('DOB')
         license = request.POST.get('license')
-        # import ipdb
-        # ipdb.set_trace()
-
-        # with connection.cursor() as cursor:
-        #     cursor.execute("SELECT * FROM Customer WHERE email=%s", [email])
-        #     cursor.execute("SELECT * FROM driver WHERE email=%s", [email])
-        #     customer = cursor.fetchone()
-        #     driver = cursor.fetchone()
-        # if ((customer is None) and (driver is not None)):
-        #     print(customer)  # customer does not exists but driver exists
-        #     if(role == "Customer"):
-        #         print("Email already exists in Customer table, cannot create driver")
-        #         return redirect("http://127.0.0.1:8000/signup")
-        #     else:
-        #         with connection.cursor() as cursor:
-        #             cursor.execute("INSERT INTO Customer (email, pass_word, firstname, middlename, lastname, contact, DOB) VALUES (%s, %s,%s, %s, %s, %s, %s)", [
-        #                 email, hashed_password, firstname, middlename, lastname, contact, dob])
-        #             print("account created")
-        #             return redirect("http://127.0.0.1:8000/login")
-
-        # elif (customer is not None and driver is None):
-        #     if(role == "Customer"):
-        #         output_driver = {}
-        #         with connection.cursor() as cursor:
-        #             cursor.execute("INSERT INTO driver (email,pass_word, firstname, middlename, lastname, contact, DOB) VALUES (%s,%s, %s, %s, %s, %s, %s)", [
-        #                 email, hashed_password, firstname, middlename, lastname, contact, dob])
-        #             driver_id = cursor.lastrowid
-        #             output_driver = {'driver_id': driver_id, 'firstname': firstname,
-        #                              'middlename': middlename, 'lastname': lastname}
-        #             print(output_driver)
-        #             return redirect("http://127.0.0.1:8000/signup/vehicle", output_driver)
-        #     else:
-
-        #         print("Email already exists in driver table, cannot create Customer")
-        #         return redirect("http://127.0.0.1:8000/signup")
-        # else:
+        if(len(contact) != 10):
+            messages.error(request, 'Enter valid Contact number')
+            return render(request, 'signup.html')
+        if(len(password) < 5):
+            messages.error(request, 'Very short password')
+            return render(request, 'signup.html')
+        print(dob)
         if(role == "Customer"):
+
             with connection.cursor() as cursor:
-                cursor.execute("INSERT INTO Customer (email, pass_word, firstname, middlename, lastname, contact, DOB) VALUES (%s, %s,%s, %s, %s, %s, %s)", [
-                    email, hashed_password, firstname, middlename, lastname, contact, dob])
-                customer_id = cursor.lastrowid
-                print("account created")
                 cursor.execute(
-                    "insert into customer_details(customer_id , contact) values(%s , %s)", [customer_id, contact])
-                return redirect("http://127.0.0.1:8000/login")
+                    '''
+                SELECT * FROM driver WHERE email = %s;
+                ''', [email]
+                )
+                data = cursor.fetchone()
+            with connection.cursor() as cursor2:
+                cursor2.execute(
+                    '''
+                SELECT * FROM Customer WHERE email = %s;
+                ''', [email]
+                )
+                data2 = cursor2.fetchone()
+                print(data)
+            if(data == None and data2 == None):
+                with connection.cursor() as cursor:
+                    cursor.execute("INSERT INTO Customer (email, pass_word, firstname, middlename, lastname, contact, DOB) VALUES (%s, %s,%s, %s, %s, %s, %s)", [
+                        email, hashed_password, firstname, middlename, lastname, contact, dob])
+                    customer_id = cursor.lastrowid
+                    print("account created")
+                    cursor.execute(
+                        "insert into customer_details(customer_id , contact) values(%s , %s)", [customer_id, contact])
+                    # deadline 5
+                    return redirect("http://127.0.0.1:" + str(port_no) + "/")
+
+            else:
+                messages.error(request, 'account exists with same email')
+
         output_driver = {}
         with connection.cursor() as cursor:
             cursor.execute(
-                "SELECT admin_id FROM Admins ORDER BY admin_id DESC LIMIT 1")
-            row = cursor.fetchone()
-            admin_id = row[0]
-        with connection.cursor() as cursor:
-            print(admin_id)
-            cursor.execute("INSERT INTO driver (email,pass_word, firstname, middlename, lastname, contact, DOB , license_no , verified , verified_by) VALUES (%s,%s, %s, %s, %s, %s, %s , %s , %s ,%s)", [
-                email, hashed_password, firstname, middlename, lastname, contact, dob, license, 1, admin_id])
-            driver_id = cursor.lastrowid
-            cursor.execute(
-                "UPDATE Admins SET verified_Driver = verified_Driver + 1 WHERE admin_id = %s;", [admin_id])
-            cursor.execute("INSERT INTO verifies(driver_id, Admin_id) VALUES(%s, %s)", [
-                           driver_id, admin_id])
-            cursor.execute(
-                "insert into driver_details(driver_id , contact) values(%s , %s)", [driver_id, contact])
-            output_driver = {'driver_id': driver_id, 'firstname': firstname,
-                             'middlename': middlename, 'lastname': lastname}
-            print(output_driver)
-            return redirect("http://127.0.0.1:8000/signup/vehicle?driver_id={}&firstname={}&middlename={}&lastname={}".format(driver_id, firstname, middlename, lastname))
-
+                '''
+            SELECT * FROM driver WHERE email = %s;
+            ''', [email]
+            )
+            data = cursor.fetchone()
+        with connection.cursor() as cursor2:
+            cursor2.execute(
+                '''
+            SELECT * FROM Customer WHERE email = %s;
+            ''', [email]
+            )
+            data2 = cursor2.fetchone()
+        if(data == None and data2 == None):
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT admin_id FROM Admins ORDER BY admin_id DESC LIMIT 1")
+                row = cursor.fetchone()
+                admin_id = row[0]
+            with connection.cursor() as cursor:
+                print(admin_id)
+                cursor.execute("INSERT INTO driver (email,pass_word, firstname, middlename, lastname, contact, DOB , license_no , verified , verified_by) VALUES (%s,%s, %s, %s, %s, %s, %s , %s , %s ,%s)", [
+                    email, hashed_password, firstname, middlename, lastname, contact, dob, license, 1, admin_id])
+                driver_id = cursor.lastrowid
+                cursor.execute(
+                    "UPDATE Admins SET verified_Driver = verified_Driver + 1 WHERE admin_id = %s;", [admin_id])
+                cursor.execute("INSERT INTO verifies(driver_id, Admin_id) VALUES(%s, %s)", [
+                    driver_id, admin_id])
+                cursor.execute(
+                    "insert into driver_details(driver_id , contact) values(%s , %s)", [driver_id, contact])
+                output_driver = {'driver_id': driver_id, 'firstname': firstname,
+                                 'middlename': middlename, 'lastname': lastname}
+                print(output_driver)
+                return redirect("http://127.0.0.1:" + str(port_no) + "/signup/vehicle?driver_id={}&firstname={}&middlename={}&lastname={}".format(driver_id, firstname, middlename, lastname))
+        else:
+            messages.error(request, 'account exists with same email')
     return render(request, 'signup.html')
 
 
@@ -165,7 +176,7 @@ def reg_vehicle(request):
                 cursor.execute("insert into Hatchback(vehicle_id , tot_passengers) values(%s,%s)", [
                                vehicle_id, passengers])
             print(vehicle_id)
-            return redirect("http://127.0.0.1:8000/login")
+            return redirect("http://127.0.0.1:" + str(port_no) + "/login")
 
     return render(request, 'regvehicle.html')
 
@@ -208,14 +219,14 @@ def Login_view(request):
         print(user)
         if user is not None:
             output = {'id': user[6], 'email': user[0], 'firstname': user[1], 'middlename': user[2],
-                      'lastname': user[3],  'phone': user[5], 'type': user[7]}
+                      'lastname': user[3], 'dob': user[4], 'phone': user[5], 'type': user[7]}
             password_match = check_password(password, user[8])
             print(user[1])
             if password_match:
                 print("matched")
                 # setting logged in USER to global variable
                 set_user_data(output)
-                return redirect("http://127.0.0.1:8000")
+                return redirect("http://127.0.0.1:" + str(port_no))
             else:
                 print("not matched")
                 messages.error(request, 'Invalid login credentials')
@@ -233,11 +244,15 @@ def booking(request):
     if request.method == 'POST':
         from_ = request.POST['location_from']
         to_ = request.POST['location_to']
+        locName, distance, flat, flon, tlat, tlon = request.POST['locName'], request.POST['distance'], request.POST['fromLatitude'], request.POST[
+            'fromLongitude'], request.POST['toLatitude'], request.POST['toLongitude']
         print(from_)
         print(to_)
+        print('this', locName, distance, flat, flon, tlat, tlon)
         accept_decline = {'f': from_, 't': to_}
         print(accept_decline)
-        return redirect("request/?from={}&to={}".format(from_, to_))
+        return redirect("request/?from={}&to={}&flat={}&flon={}&tlat={}&tlon={}&d={}&address={}".format(from_, to_, flat, flon, tlat, tlon, distance, locName))
+
     return render(request, 'booking.html', {'output': output})
 
 
@@ -245,38 +260,58 @@ def Request(request):
     print('in request')
     from_ = request.GET.get('from')
     to_ = request.GET.get('to')
+    flat = request.GET.get('flat')
+    flon = request.GET.get('flon')
+    tlon = request.GET.get('tlon')
+    tlat = request.GET.get('tlat')
+    dist = request.GET.get('d')
+    address = request.GET.get('address')
     output = get_user_data()
     print(output)
-    # data = json.loads(request.body)
-    # distance = data.get('distance')
-    # new_locationlat = data.get('new_locationlat')
-    # current_locationlat = data.get('current_locationlat')
-    # new_locationlong = data.get('new_locationlong')
-    # current_locationlong = data.get('current_locationlong')
-    # trip_data = {"d": distance, 'nlat': new_locationlat, 'nlong': new_locationlong,
-    #              'clat': current_locationlat, 'clong': current_locationlong}
-    # print(trip_data)
     output2 = {'from': from_, 'to': to_, 'output': output}
-    if(output):
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO trip(pickup_location , drop_location , ride_status) Values(%s , %s ,%s)", [from_, to_, "PENDING"])
-            trip_id = cursor.lastrowid
-        with connection.cursor() as cursor:
-            cursor.execute(
-                "INSERT INTO requests(customer_id , trip_id) VALUES(%s , %s)", [output['id'], trip_id])
+    if(request.method != "POST"):
+        if(output):
+            with connection.cursor() as cursor:
+                cursor.execute("update Customer set current_location_lat = %s where Customer_id = %s", [
+                    flat, output['id']])
+                cursor.execute("update Customer set current_location_long = %s where Customer_id = %s", [
+                    flon, output['id']])
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO trip(pickup_location , drop_location , ride_status) Values(%s , %s ,%s)", [from_, to_, "PENDING"])
+                trip_id = cursor.lastrowid
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "INSERT INTO requests(customer_id , trip_id , distance , from_lat , to_lat , from_lon , to_lon , address) VALUES(%s , %s , %s , %s , %s , %s , %s , %s)", [output['id'], trip_id, dist, flat, tlat, flon, tlon, address])
+
     if(request.method == "POST"):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT trip_id FROM trip ORDER BY trip_id DESC LIMIT 1")
+            row = cursor.fetchone()
+            trip_id = row[0]
+        if 'refresh_trip' in request.POST:
+            refresh = request.POST['refresh_trip']
+            print(refresh)
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "select * from accept_or_decline where trip_id =%s", [trip_id])
+                refresh_data = cursor.fetchone()
+            if(refresh_data is not None):
+                return redirect("http://127.0.0.1:" + str(port_no) + "tracking/?dist={}".format(dist))
+            else:
+                messages.error(request, "No Driver nearby please wait")
         if 'cancel_request' in request.POST:
             cancel_request = request.POST['cancel_request']
             print(cancel_request)
             with connection.cursor() as cursor:
                 with connection.cursor() as cursor:
                     cursor.execute(
-                        "DELETE FROM requests WHERE trip_id = %s ", [trip_id])
+                        "DELETE FROM requests WHERE customer_id = %s ", [output['id']])
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE trip SET ride_status = 'Cancelled' WHERE trip_id=%s", [trip_id])
-            return redirect("http://127.0.0.1:8000/booking")
+            return redirect("http://127.0.0.1:" + str(port_no) + "/booking")
 
     # Emit custom signal
     # request_made.send(sender=request.user, request=request)
@@ -294,7 +329,12 @@ def driver_requests(request):
                 "SELECT * FROM requests r JOIN trip t ON r.trip_id=t.trip_id;")
             print("outquery")
             data = cursor2.fetchall()
-        output2 = {'output': output, 'data': data}
+            if(data):
+                time = int(data[0][2])/660
+                output2 = {'output': output, 'data': data, 'time': time}
+            else:
+                output2 = {'output': output, 'data': data}
+
         print(output2)
         if(request.method == "POST"):
             if 'accept' in request.POST:
@@ -303,7 +343,23 @@ def driver_requests(request):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "INSERT INTO accept_or_decline VALUES(%s, %s);", [output['id'], data[0][0]])
-                return redirect("http://127.0.0.1:8000/request/dtracking")
+                    cursor.execute(
+                        "select * from requests where trip_id = %s", [data[0][0]])
+                    rdata = cursor.fetchone()
+                    print(rdata)
+                    time = int(rdata[2])/660
+                    fare = int(rdata[2])*0.002
+
+                    return redirect("http://127.0.0.1:" + str(port_no) + "/request/dtracking?dist={}&flat={}&tlat={}&flon={}&tlon={}&address={}&time={}&fare={}".format(
+                        rdata[2],
+                        rdata[3],
+                        rdata[4],
+                        rdata[5],
+                        rdata[6],
+                        rdata[7],
+                        time,
+                        fare,
+                    ))
 
             if 'decline' in request.POST:
                 decline = request.POST['decline']
@@ -314,20 +370,47 @@ def driver_requests(request):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "UPDATE trip SET ride_status = 'Cancelled' WHERE trip_id=%s", [data[0][0]])
-                    return redirect("http://127.0.0.1:8000/drequests/")
+                    return redirect("http://127.0.0.1:" + str(port_no) + "/drequests/")
+
         return render(request, 'drequest.html', {'output2': output2})
 
 
 def driver_tracking(request):
-    return render(request, 'dtracking.html')
+    output = get_user_data()
+    dist = request.GET.get('dist')
+    flat = request.GET.get('flat')
+    tlat = request.GET.get('tlat')
+    flon = request.GET.get('flon')
+    tlon = request.GET.get('tlon')
+    address = request.GET.get('address')
+    time = request.GET.get('time')
+    fare = request.GET.get('fare')
+    data = {
+        'output': output,
+        'dist': dist,
+        'flat': flat,
+        'tlat': tlat,
+        'flon': flon,
+        'tlon': tlon,
+        'address': address,
+        'time': time,
+        'fare': fare
+    }
+    return render(request, 'dtracking.html', {'output': data})
 
 
 def tracking(request):
     output = get_user_data()
+    print(output)
     print('in tracking')
     data = request.GET.get('data')
     print(data)
-    return render(request, 'tracking.html')
+    dict = request.GET.get("dict")
+    print(dict)
+    time = int(dict)/660
+    fare = int(dict)*0.002
+    result_dict = {'dict': dict, 'time': time, 'fare': fare}
+    return render(request, 'tracking.html', {"result": result_dict})
 
 
 def payment(request):
@@ -337,24 +420,91 @@ def payment(request):
 
 def profile(request):
     output = get_user_data()
+    profile_data = None
+    if(output['type'] == 'Customer'):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select * from customer_info where Customer_id = %s", [output['id']])
+            profile_data = cursor.fetchone()
+    elif(output['type'] == 'Driver'):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "select * from driver_info where driver_id = %s", [output['id']])
+            profile_data = cursor.fetchone()
+    output2 = {'profile': profile_data, 'user': output}
+    # output2 = {'profile': profile_data}
+    print('profile port', port_no)
     print(output)
+    print(profile_data)
     if(request.method == "POST"):
+        if('view_vehicle' in request.POST):
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "select * from vehicle_info where driver_id = %s;", [output['id']])
+                vehicle_data = cursor.fetchone()
+
+                # Redirect to the vehicle_info view
+                return redirect("http://127.0.0.1:{}/vehicle_info?vehicle_id={}&owner_firstname={}&owner_middlename={}&owner_lastname={}&engine_no={}&date_of_manufacture={}&validity={}&car_model={}&car_make={}&car_type={}&driver_id={}".format(
+                    port_no,
+                    vehicle_data[0],
+                    vehicle_data[1],
+                    vehicle_data[2],
+                    vehicle_data[3],
+                    vehicle_data[4],
+                    vehicle_data[5],
+                    vehicle_data[6],
+                    vehicle_data[7],
+                    vehicle_data[8],
+                    vehicle_data[9],
+                    vehicle_data[10]
+                ))
+
         if 'update_user' in request.POST:
-            return redirect("http://127.0.0.1:8000/updateprofile")
+            return redirect("http://127.0.0.1:" + str(port_no) + "/updateprofile")
         elif('add_phone' in request.POST):
-            return redirect("http://127.0.0.1:8000/addphone")
+            return redirect("http://127.0.0.1:" + str(port_no) + "/addphone")
         else:
             if(output['type'] == 'Customer'):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "delete from Customer where customer_id = %s ", [output['id']])
-                return redirect("http://127.0.0.1:8000/goodbye")
+                return redirect("http://127.0.0.1:" + str(port_no) + "/goodbye")
             if(output['type'] == 'Driver'):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "delete from driver where driver_id = %s ", [output['id']])
-                return redirect("http://127.0.0.1:8000/goodbye")
-    return render(request, 'profile.html', {'output': output})
+                return redirect("http://127.0.0.1:" + str(port_no) + "/goodbye")
+    return render(request, 'profile.html', {'output': output2})
+
+
+def vehicle(request):
+    vehicle_id = request.GET.get('vehicle_id')
+    owner_firstname = request.GET.get('owner_firstname')
+    owner_middlename = request.GET.get('owner_middlename')
+    owner_lastname = request.GET.get('owner_lastname')
+    engine_no = request.GET.get('engine_no')
+    date_of_manufacture = request.GET.get('date_of_manufacture')
+    validity = request.GET.get('validity')
+    car_model = request.GET.get('car_model')
+    car_make = request.GET.get('car_make')
+    car_type = request.GET.get('car_type')
+    driver_id = request.GET.get('driver_id')
+
+    vehicle_dict = {
+        'id': vehicle_id,
+        'owner_firstname': owner_firstname,
+        'owner_middlename': owner_middlename,
+        'owner_lastname': owner_lastname,
+        'engine_no': engine_no,
+        'date_of_manufacture': date_of_manufacture,
+        'validity': validity,
+        'model': car_model,
+        'make': car_make,
+        'type': car_type,
+        'driver_id': driver_id
+    }
+
+    return render(request, 'vehicle.html', {'output': vehicle_dict})
 
 
 def account_delete(request):
@@ -383,7 +533,7 @@ def updateprofile(request):
                     output['firstname'] = firstname
                     output['lastname'] = lastname
                     output['phone'] = phone
-                return redirect("http://127.0.0.1:8000/profile", {})
+                return redirect("http://127.0.0.1:" + str(port_no) + "/profile", {})
             elif(output['type'] == 'driver'):
                 with connection.cursor() as cursor:
                     cursor.execute(
@@ -397,7 +547,7 @@ def updateprofile(request):
                     output['firstname'] = firstname
                     output['lastname'] = lastname
                     output['phone'] = phone
-                return redirect("http://127.0.0.1:8000/profile")
+                return redirect("http://127.0.0.1:" + str(port_no) + "/profile")
     return render(request, 'updateprofile.html')
 
 
@@ -412,7 +562,7 @@ def addphone(request):
                 cursor.execute("insert into customer_details(customer_id , contact) values(%s , %s)", [
                                output['id'], phone])
                 output['phone'] = phone
-            return redirect("http://127.0.0.1:8000/profile")
+            return redirect("http://127.0.0.1:" + str(port_no) + "/profile")
         elif(output['type'] == 'driver'):
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -421,7 +571,7 @@ def addphone(request):
                     ''', [phone, output['id']]
                 )
                 output['phone'] = phone
-            return redirect("http://127.0.0.1:8000/profile")
+            return redirect("http://127.0.0.1:" + str(port_no) + "/profile")
 
     return render(request, 'addphone.html')
 
@@ -452,12 +602,12 @@ def passwordchange(request):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "update Customer set pass_word = %s", [newpass])
-                return redirect("http://127.0.0.1:8000/login")
+                return redirect("http://127.0.0.1:" + str(port_no) + "/login")
             elif(data[0] == 'driver'):
                 with connection.cursor() as cursor:
                     cursor.execute(
                         "update driver set pass_word = %s", [newpass])
-                return render("http://127.0.0.1:8000/login")
+                return render("http://127.0.0.1:" + str(port_no) + "/login")
     return render(request, 'passwordchange.html')
 
 
@@ -525,3 +675,8 @@ def contactus(request):
 #             print(e)
 
 #     return render(request, 'tables.html', table)
+
+
+def coordinates(request):
+    if(request.method == "POST"):
+        print(request.POST['distance'])

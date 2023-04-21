@@ -15,10 +15,10 @@
         <nav>
             <ul>
                 <script>console.log(output)</script>
-                <li><a href="about-us/">About Us</a></li>
+                <li><a href="/about-us/">About Us</a></li>
                 <li><a href="/contact-us/">Contact Us</a></li>
-                <li><a href="http://127.0.0.1:8000/profile/">Profile</a></li>
-                <li><a href="http://127.0.0.1:8000/logout/">Logout</a></li>
+                <li><a href="/profile/">Profile</a></li>
+                <li><a href="/logout/">Logout</a></li>
             </ul>
         </nav>
     </header>
@@ -40,25 +40,69 @@
                         <tr>
                             <th>Customer Name</th>
                             <th>Location</th>
-                            <th>Time Away</th>
                             <th>Distance Away</th>
+                            <th>Time Away</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for request in output2.data %}
                         <tr>
                             <td>{{ output2.output.firstname }}</td>
-                            <td>{{ request.4 }}</td>
-                            <td>{{ 15 }}mins</td>
-                            <td>{{ 3 }}km</td>
-                            <form method="POST"></form>
-                            <form method="POST" action="">
+                            <td>{{ request.7 }}</td>
+                            <td>{{ request.2 }}meters</td>
+                            <td>{{ output2.time}} min</td>
+                            
+                            <form id="my_form" method="POST" action="">
                                 {% csrf_token %}
                                 <td>
                                     <button name="accept"  type="submit" class="accept">Accept</button>
+                                    <br>
                                     <button name="decline" type="submit" class="decline">Decline</button>
+                                    <!-- <input type="hidden" id="haccept" name="haccept" value="">
+                                    <input type="hidden" id="hdecline" name="hdecline" value=""> -->
                                 </td>
                             </form>
+                            <script>
+                                // Get a reference to the form element
+                                    const form = document.getElementById("myForm");
+
+                                    // Add an event listener to the form's submit event
+                                    form.addEventListener("submit", (event) => {
+                                        // Prevent the form from submitting normally
+                                        event.preventDefault();
+
+                                        // Get the value of the "accept" button
+                                        const accept = form.elements.accept.value;
+
+                                        // Create a new XMLHttpRequest object
+                                        const xhr = new XMLHttpRequest();
+
+                                        // Configure the request
+                                        xhr.open("POST", "http://127.0.0.1:8000/booking/request/");
+
+                                        // Set the content type of the request
+                                        xhr.setRequestHeader("Content-Type", "application/json");
+
+                                        // Define the callback function for when the request completes
+                                        xhr.onload = () => {
+                                            if (xhr.status === 200) {
+                                                // Do something with the response
+                                            } else {
+                                                // Handle the error
+                                            }
+                                        };
+
+                                        // Create a JSON object with the data to send
+                                        const data = { accept: accept };
+
+                                        // Convert the data to a JSON string
+                                        const json = JSON.stringify(data);
+
+                                        // Send the request
+                                        xhr.send(json);
+                                    });
+
+                            </script>
                         </tr>
                         {% endfor %}
                     </tbody>
