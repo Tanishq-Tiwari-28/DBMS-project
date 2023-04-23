@@ -28,16 +28,21 @@
             <h1>Book a Ride with Lyft</h1>
             {% endif %}
             <p>Safe and reliable rides at affordable prices</p>
-            <a href="booking" class="button">Book a Ride</a>
 
         </section>
         <div class="book-a-ride" id="book-a-ride">
             <h2>Order Summary</h2>
-            <p><strong>Pickup Location:</strong> 123 Main Street</p>
-            <p><strong>Drop-off Location:</strong> 456 Oak Avenue</p>
+            <p><strong>Pickup Location:</strong> {{result.from}}</p>
+            <p><strong>Drop-off Location:</strong> {{result.address}} </p>
             <p><strong>Cab Type:</strong> Standard</p>
-            <p><strong>Ride Duration:</strong> 30 minutes</p>
-            <p><strong>Total Cost:</strong> $20</p>
+            <p><strong>Ride Duration:</strong> {{ result.time}}</p>
+            <p><strong>Total Cost:</strong> {{ result.fare}}</p>
+            <br>
+            <form method="POST">
+                {% csrf_token %}
+                <button name="rating" type="submit" id ="rating" class="rating">Rate Our Driver {{result.output.firstname}}</button>
+            </form>
+            
         </div> 
     </main>
     <footer>

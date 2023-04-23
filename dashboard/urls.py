@@ -27,10 +27,11 @@ urlpatterns = [
     path('drequests/', driver_requests),
     path('login/', Login_view),
     path('payment/', payment),
+    path('rating/', rating),
     path('about-us/', aboutus),
     path('contact-us/', contactus),
     path('profile/', profile),
     path('vehicle_info/', vehicle),
     path('goodbye/', account_delete),
-    path('coordinates/', coordinates)
+
 ]

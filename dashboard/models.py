@@ -68,7 +68,7 @@ class Driver(models.Model):
     current_location_lat = models.FloatField(blank=True, null=True)
     current_location_long = models.FloatField(blank=True, null=True)
     ratings = models.IntegerField(blank=True, null=True)
-    available = models.IntegerField(blank=True, null=True)
+    available = models.BooleanField(blank=True, null=True, default=True)
 
     class Meta:
         managed = False

@@ -28,7 +28,7 @@
         </section>
         <section class="book-a-ride" id="book-a-ride">
             <h2>Trip details</h2>
-                <p><strong>Distance Away: </strong>{{result.dist}} meter</p>
+                <p><strong>Distance Away: </strong> {{result.dist }} meter</p>
                 <p><strong>Time Away:</strong>{{result.time}} mins</p>
                 <p><strong>FARE:</strong>{{result.fare}} Rs</p>
                 <script>
@@ -40,6 +40,15 @@
                         zoom: 13
                     });
                 </script><br>
+
+                <form action="" method="POST">
+                    {% csrf_token%}
+                    <button name="cpayment" id="cpayment" type="submit" class="cpayment">Pay Via Cash</button>
+                    <br>
+                    <button name="opayment" id="opayment" type="submit" class="opayment">Pay Online</button>
+                </form>
+                
+                
         </section>
     </main>
     <footer>

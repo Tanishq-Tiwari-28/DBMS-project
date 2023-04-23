@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 import json
 from django.http import JsonResponse
 from django.db import connection
@@ -265,9 +267,11 @@ def Request(request):
     tlon = request.GET.get('tlon')
     tlat = request.GET.get('tlat')
     dist = request.GET.get('d')
-    time = float(dist)/660
-    fare = float(dist)*0.002
+    time = round(float(dist)/660)
+    fare = round(float(dist)*0.002)
     address = request.GET.get('address')
+    print(from_)
+    print(address, "request")
     output = get_user_data()
     print(output)
     output2 = {'from': from_, 'to': to_, 'output': output}
@@ -300,7 +304,7 @@ def Request(request):
                     "select * from accept_or_decline where trip_id =%s", [trip_id])
                 refresh_data = cursor.fetchone()
             if(refresh_data is not None):
-                return redirect("tracking/?dist={}&fare={}&time={}".format(dist, fare, time))
+                return redirect("tracking/?dist={}&fare={}&time={}&address={}&from={}&trip_id={}".format(dist, fare, time, address, from_, trip_id))
             else:
                 messages.error(request, "No Driver nearby please wait")
         if 'cancel_request' in request.POST:
@@ -320,6 +324,105 @@ def Request(request):
     return render(request, 'request.html',  {'output': output2})
 
 
+def tracking(request):
+    output = get_user_data()
+    print(output)
+    print('in tracking')
+    # data = request.GET.get('data')
+    # print(data)
+    from_ = request.GET.get("fare")
+    dist = request.GET.get("dist")
+    time = request.GET.get("time")
+    fare = round(float(dist)*0.002)
+    address = request.GET.get("address")
+    trip_id = request.GET.get("trip_id")
+    print(from_)
+    print(address, "tracking")
+    print(dist)
+    result_dict = {'dist': dist, 'time': time,
+                   'fare': fare, 'address': address, 'from': from_}
+    print(result_dict)
+    if(request.method == 'POST'):
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "update trip set payable_amount = %s where trip_id = %s", [fare, trip_id])
+            cursor.execute("update trip set pickup_time = %s where trip_id = %s",
+                           [timezone.now() - timedelta(minutes=round(float(time))), trip_id])
+            cursor.execute(
+                "update trip set drop_time = %s where trip_id = %s;", [timezone.now(), trip_id])
+            cursor.execute(
+                "update trip set ride_status = 'Completed' where trip_id = %s", [
+                    trip_id]
+            )
+        if 'cpayment' in request.POST:
+            cpayment = request.POST['cpayment']
+            print(cpayment)
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "update trip set mode_of_transaction = 'Cash' where trip_id = %s", [trip_id])
+                cursor.execute("update driver set available = %s", [True])
+            return redirect("http://127.0.0.1:" + str(port_no) + "/payment/?from={}&dist={}&time={}&fare={}&address={}&trip_id={}".format(from_, dist, time, fare, address, trip_id))
+        if 'opayment' in request.POST:
+            opayment = request.POST['opayment']
+            print(opayment)
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "update trip set mode_of_transaction = 'UPI transfer' where trip_id = %s", [trip_id])
+                cursor.execute("update driver set available = %s", [True])
+            return redirect("http://127.0.0.1:" + str(port_no) + "/payment/?from={}&dist={}&time={}&fare={}&address={}&trip_id={}".format(from_, dist, time, fare, address, trip_id))
+    return render(request, 'tracking.html', {"result": result_dict})
+
+
+def payment(request):
+    output = get_user_data()
+    dist = request.GET.get("dist")
+    time = request.GET.get("time")
+    fare = request.GET.get("fare")
+    address = request.GET.get("address")
+    from_ = request.GET.get("from")
+    trip_id = request.GET.get('trip_id')
+    print(from_)
+    print(address, "payment")
+    with connection.cursor() as cursor:
+        cursor.execute('''
+                    select* from driver where driver_id in(
+                        SELECT driver_id
+                        FROM accept_or_decline
+                        WHERE trip_id IN (
+                            SELECT trip_id
+                            FROM requests
+                            WHERE customer_id = %s))
+
+                    ''', [output['id']])
+        driver_data = cursor.fetchone()
+        print(driver_data)
+    result = {'output': output, 'time': time, "from": from_,
+              'fare': fare, 'address': address, 'dist': dist, 'driver': driver_data}
+    if(request.method == "POST"):
+        rating = request.POST['rating']
+        print(rating)
+        return redirect("http://127.0.0.1:" + str(port_no) + "/rating/?trip_id={}".format(trip_id))
+    return render(request, 'payment.html', {"result": result})
+
+
+def rating(request):
+    trip_id = request.GET.get('trip_id')
+    if(request.method == "POST"):
+        if 'skip' in request:
+            return redirect("http://127.0.0.1:" + str(port_no))
+        else:
+            stars = request.POST['stars']
+            suggestions = request.POST['suggestions']
+            print(stars)
+            print(suggestions)
+            with connection.cursor() as cursor:
+                cursor.execute(" insert into rating(trip_id , stars, complaints) values(%s , %s , %s); ", [
+                    trip_id, stars, suggestions, ])
+            messages.success(request, " Thank you For Using Lyft cabs")
+            return redirect("http://127.0.0.1:" + str(port_no))
+    return render(request, 'rating.html')
+
+
 def driver_requests(request):
     print('in driver requests')
     output = get_user_data()
@@ -328,7 +431,7 @@ def driver_requests(request):
         with connection.cursor() as cursor2:
             print("INquery")
             cursor2.execute(
-                "SELECT * FROM requests r JOIN trip t ON r.trip_id=t.trip_id;")
+                "SELECT * FROM requests r JOIN trip t ON r.trip_id=t.trip_id and t.ride_status = 'PENDING';")
             print("outquery")
             data = cursor2.fetchall()
             if(data):
@@ -348,11 +451,14 @@ def driver_requests(request):
                     cursor.execute(
                         "select * from requests where trip_id = %s", [data[-1][0]])
                     rdata = cursor.fetchone()
-                    print(rdata)
-                    time = int(rdata[2])/660
-                    fare = int(rdata[2])*0.002
 
-                    return redirect("http://127.0.0.1:" + str(port_no) + "/request/dtracking?dist={}&flat={}&tlat={}&flon={}&tlon={}&address={}&time={}&fare={}".format(
+                with connection.cursor() as cursor:
+                    cursor.execute("update driver set available = %s", [False])
+                    print(rdata)
+                    time = round(float(rdata[2])/660)
+                    fare = round(float(rdata[2])*0.002)
+
+                    return redirect("http://127.0.0.1:" + str(port_no) + "/request/dtracking?dist={}&flat={}&tlat={}&flon={}&tlon={}&address={}&time={}&fare={}&id={}".format(
                         rdata[2],
                         rdata[3],
                         rdata[4],
@@ -361,6 +467,7 @@ def driver_requests(request):
                         rdata[7],
                         time,
                         fare,
+                        data[-1][0]
                     ))
 
             if 'decline' in request.POST:
@@ -387,6 +494,7 @@ def driver_tracking(request):
     address = request.GET.get('address')
     time = request.GET.get('time')
     fare = request.GET.get('fare')
+    trip_id = request.GET.get('id')
     data = {
         'output': output,
         'dist': dist,
@@ -398,26 +506,17 @@ def driver_tracking(request):
         'time': time,
         'fare': fare
     }
+    if(request.method == "POST"):
+        if 'drefresh' in request:
+            drefresh = request.POST['drefresh']
+            print(drefresh)
+            print("last data", data['fare'])
+            if(data['fare'] is not None):
+                messages.success(request, "Payment Successfull")
+                return redirect("http://127.0.0.1:" + str(port_no))
+            else:
+                messages.error(request, "Wait for Payment")
     return render(request, 'dtracking.html', {'output': data})
-
-
-def tracking(request):
-    output = get_user_data()
-    print(output)
-    print('in tracking')
-    # data = request.GET.get('data')
-    # print(data)
-    dist = request.GET.get("dist")
-    time = request.GET.get("time")
-    fare = request.GET.get("fare")
-    print(dist)
-    result_dict = {'dist': dist, 'time': time, 'fare': fare}
-    return render(request, 'tracking.html', {"result": result_dict})
-
-
-def payment(request):
-    output = get_user_data()
-    return render(request, 'payment.html')
 
 
 def profile(request):
@@ -589,8 +688,8 @@ def passwordchange(request):
         with connection.cursor() as cursor:
             cursor.execute(
                 '''
-                SELECT 'driver' as user_type, pass_word FROM driver WHERE email = %s 
-                UNION ALL 
+                SELECT 'driver' as user_type, pass_word FROM driver WHERE email = %s
+                UNION ALL
                 SELECT 'customer' as user_type, pass_word FROM customer WHERE email = %s;
                 ''', [email, email]
             )
@@ -677,8 +776,3 @@ def contactus(request):
 #             print(e)
 
 #     return render(request, 'tables.html', table)
-
-
-def coordinates(request):
-    if(request.method == "POST"):
-        print(request.POST['distance'])

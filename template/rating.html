@@ -32,17 +32,16 @@
             <p>Safe and reliable rides at affordable prices</p>
         </section>
         <div class="book-a-ride" id="book-a-ride">
-            <h1>Update Profile</h1>
+            <h1>Rate Our Driver</h1>
             <form method="POST">
                 {% csrf_token %}
-                <label for="firstname">First Name:</label>
-                <input type="text" name="firstname" ><br><br>
-                <label for="lastname">Last Name:</label>
-                <input type="text" name="lastname"><br><br>
-                <label for="phone">Phone Number:</label>
-                <input type="number" name="phone" ><br><br>
-                
-                <button type="submit" name="update_profile">Update</button>
+                <label for="stars">Stars: </label>
+                <input type="number" name="stars"><br><br>
+                <label for="suggestions">Any suggestions to help us improve: </label>
+                <input type="text" name="suggestions"><br><br>
+                <button  id= "submit" class="submit" type="submit">Submit</button>
+                <br>
+                <button id= "skip" class="skip" type="submit">Skip</button>
             </form>
         </div>
     </main>
