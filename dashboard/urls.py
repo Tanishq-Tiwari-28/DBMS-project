@@ -29,6 +29,7 @@ urlpatterns = [
     path('payment/', payment),
     path('rating/', rating),
     path('about-us/', aboutus),
+    path('trip_history/', history),
     path('contact-us/', contactus),
     path('profile/', profile),
     path('vehicle_info/', vehicle),

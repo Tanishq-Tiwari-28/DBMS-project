@@ -562,9 +562,11 @@ def profile(request):
 
         if 'update_user' in request.POST:
             return redirect("http://127.0.0.1:" + str(port_no) + "/updateprofile")
-        elif('add_phone' in request.POST):
+        if 'trip_history' in request.POST:
+            return redirect("http://127.0.0.1:" + str(port_no) + "/trip_history")
+        if 'add_phone' in request.POST:
             return redirect("http://127.0.0.1:" + str(port_no) + "/addphone")
-        else:
+        if 'delete_user' in request.POST:
             if(output['type'] == 'Customer'):
                 with connection.cursor() as cursor:
                     cursor.execute(
@@ -606,6 +608,29 @@ def vehicle(request):
     }
 
     return render(request, 'vehicle.html', {'output': vehicle_dict})
+
+
+def history(request):
+    output = get_user_data()
+    trip_history = None
+    if(output['type'] == 'Customer'):
+        with connection.cursor() as cursor:
+            cursor.execute('''
+                select * from trip where trip_id in 
+                (select trip_id from requests 
+                where Customer_id = %s);
+                ''', [output['id']])
+            trip_history = cursor.fetchall()
+    elif(output['type'] == 'Driver'):
+        with connection.cursor() as cursor:
+            cursor.execute('''
+                select * from trip where trip_id in 
+                (select trip_id from accept_or_decline
+                where driver_id = %s);
+                ''', [output['id']])
+            trip_history = cursor.fetchall()
+    result = {'trip_history': trip_history, 'type': output['type']}
+    return render(request, 'history.html', {'output': result})
 
 
 def account_delete(request):
@@ -664,12 +689,12 @@ def addphone(request):
                                output['id'], phone])
                 output['phone'] = phone
             return redirect("http://127.0.0.1:" + str(port_no) + "/profile")
-        elif(output['type'] == 'driver'):
+        elif(output['type'] == 'Driver'):
             with connection.cursor() as cursor:
                 cursor.execute(
                     '''
-                        INSERT INTO driver_details(contact , driver_id) VALUES(%s , %s);
-                    ''', [phone, output['id']]
+                        INSERT INTO driver_details(driver_id , contact ) VALUES(%s , %s);
+                    ''', [output['id'], phone]
                 )
                 output['phone'] = phone
             return redirect("http://127.0.0.1:" + str(port_no) + "/profile")

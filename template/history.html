@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyft Cab Services</title>
+    <link rel="stylesheet" href="../static/home.css">
+    <link rel="stylesheet" href="../static/booking.css">
+    <link rel="stylesheet" href="../static/requests.css">
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <script>console.log(output)</script>
+                <li><a href="/">Home</a></li>
+                <li><a href="/about-us/">About Us</a></li>
+                <li><a href="/contact-us/">Contact Us</a></li>
+                <li><a href="/logout/">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <h1>Hello {{output.owner_firstname}} </h1>
+            <p> CHECK YOUR TRIPS HISTORY</p>
+        </section>
+        
+        <section class="requests">
+            <h2>Trip history</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <td><strong>id: </strong></td>
+                        <td><strong>Pickup Point: </strong></td>
+                        <td><strong>Drop Point: </strong></td>
+                        {% if output.type == "Driver" %}
+                            <td><strong>Amount Recieved: </strong></td>
+                        {% else %}
+                            <td><strong>Amount Paid: </strong></td>
+                        {% endif %}
+                        <td><strong>Pickup Time: </strong></td>
+                        <td><strong>Drop Time: </strong></td>
+                        <td><strong>Mode of Transaction :</strong></td>
+                    </tr>
+                </thead>
+                {% for trips in output.trip_history %}
+                <tbody>
+                    <tr>
+                        <td>{{ trips.0 }}</td>
+                        <td>{{ trips.1}}</td>
+                        <td>{{ trips.2 }}</td>
+                        {% if output.type == "Driver" %}
+                            <td>{{ trips.3 }}</td>
+                        {% else %}
+                            <td>{{ trips.3}}</td>
+                        {% endif %}
+                        <td>{{ trips.4}}</td>
+                        <td>{{ trips.5 }}</td>
+                        <td>{{ trips.6}}</td>
+                    </tr>
+                </tbody>
+                {% endfor %}
+            
+            </table>
+        </section>
+        
+        
+    </main>
+    <footer>
+        <p>&copy; 2023 Cab Services. All rights reserved.</p>
+    </footer>
+</body>
+
+</html>
